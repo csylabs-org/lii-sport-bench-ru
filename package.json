@@ -1,0 +1,37 @@
+{
+  "name": "lii-sport-bench-ru",
+  "version": "0.1.0",
+  "description": "Open Russian-language sports-domain LLM benchmark — 655 expert questions × 35 sports × top-3 judge ensemble.",
+  "private": false,
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "parse": "bun code/parse.ts",
+    "sample": "bun code/sample.ts",
+    "run": "bun code/run.ts",
+    "judge": "bun code/judge.ts",
+    "aggregate": "bun code/aggregate.ts",
+    "render": "bun code/render.ts"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/csylabs-org/lii-sport-bench-ru.git"
+  },
+  "homepage": "https://bench.csylabs.com",
+  "author": "ООО ЛИИ <daniel@csylabs.com>",
+  "keywords": [
+    "llm",
+    "benchmark",
+    "russian",
+    "sports",
+    "openrouter",
+    "gemma",
+    "qwen",
+    "deepseek",
+    "judge-ensemble",
+    "open-source"
+  ]
+}
