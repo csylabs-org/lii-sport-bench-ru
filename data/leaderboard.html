@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ЛИИ-Спорт-Bench-RU v0.1 — 7-model leaderboard</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --border: #2d3148;
+    --text: #e8eaf0;
+    --muted: #8b8fa8;
+    --accent: #6366f1;
+    --green: #22c55e;
+    --amber: #f59e0b;
+    --red: #ef4444;
+    --rank1: #ffd700;
+    --rank2: #c0c0c0;
+    --rank3: #cd7f32;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.5;
+    padding: 24px;
+  }
+  h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 4px; color: #fff; }
+  h2 { font-size: 1.05rem; font-weight: 600; margin: 32px 0 12px; color: var(--accent); border-bottom: 1px solid var(--border); padding-bottom: 6px; }
+  .meta { color: var(--muted); font-size: 12px; margin-bottom: 24px; line-height: 1.8; }
+  .caveat { background: #2a1f0a; border-left: 3px solid var(--amber); padding: 10px 14px; border-radius: 4px; margin: 12px 0; font-size: 12px; color: #e8d5a3; }
+  table { width: 100%; border-collapse: collapse; margin-bottom: 16px; font-size: 13px; }
+  th { background: var(--surface); color: var(--muted); font-weight: 600; text-align: left; padding: 8px 12px; border-bottom: 2px solid var(--border); white-space: nowrap; }
+  td { padding: 7px 12px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(99,102,241,0.05); }
+  td:nth-child(n+3), th:nth-child(n+3) { text-align: right; }
+  code { font-family: "JetBrains Mono", "Fira Code", monospace; background: rgba(255,255,255,0.07); padding: 1px 5px; border-radius: 3px; font-size: 11px; }
+  .rank-1 td:nth-child(4) { color: var(--rank1); }
+  .rank-2 td:nth-child(4) { color: var(--rank2); }
+  .rank-3 td:nth-child(4) { color: var(--rank3); }
+  .bias-high { color: var(--red); font-weight: 700; }
+  .bias-med { color: var(--amber); font-weight: 600; }
+  .note { color: var(--muted); font-size: 12px; margin-bottom: 8px; font-style: italic; }
+  pre { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 14px; font-size: 12px; overflow-x: auto; color: #a8b4d0; line-height: 1.6; }
+  @media print {
+    @page { size: A4; margin: 18mm 15mm; }
+    body { background: #fff; color: #111; font-size: 11px; padding: 0; }
+    :root { --bg: #fff; --surface: #f5f5f5; --border: #ddd; --text: #111; --muted: #666; --accent: #3730a3; }
+    h1 { font-size: 1.2rem; }
+    h2 { font-size: 0.95rem; }
+    table { break-inside: avoid; }
+    tr { break-inside: avoid; }
+    pre { break-inside: avoid; font-size: 10px; }
+    .caveat { background: #fef3c7; border-color: #d97706; }
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+</style>
+</head>
+<body>
+
+<h1>ЛИИ-Спорт-Bench-RU v0.1 — 7-model leaderboard</h1>
+<div class="meta">
+  <strong>Date:</strong> 2026-05-18 &nbsp;·&nbsp;
+  <strong>Candidates:</strong> 7 &nbsp;·&nbsp;
+  <strong>Pilot:</strong> 200 Q (stratified, seed lii-2026-05-13) &nbsp;·&nbsp;
+  <strong>Judges:</strong> gemini-3.1-pro-preview, claude-opus-4.7, gpt-5.5
+</div>
+<p class="caveat"><strong>Self-judging caveat:</strong> <code>gemini-3.1-pro-preview</code> (Δ +0.77), <code>gpt-5.5</code> (Δ -0.26), <code>claude-opus-4.7</code> (Δ +0.15). These models also served as judges. See bias section below.</p>
+
+<h2>Overall ranking</h2>
+<table id="overall">
+  <thead><tr class=""><th>#</th><th>Model</th><th>n</th><th>Overall ↓</th><th>Accuracy</th><th>Completeness</th><th>Bonus</th><th>RU linguistic</th></tr></thead>
+  <tbody><tr><td>🥇 1</td><td><code>claude-opus-4.7</code></td><td>200</td><td><strong>9.10</strong></td><td>8.67</td><td>9.16</td><td>8.92</td><td>9.65</td></tr>
+<tr><td>🥈 2</td><td><code>gemini-3.1-pro-preview</code></td><td>200</td><td>8.88</td><td>8.58</td><td>8.72</td><td>8.49</td><td>9.74</td></tr>
+<tr><td>🥉 3</td><td><code>gpt-5.5</code></td><td>200</td><td>8.53</td><td>8.54</td><td>8.35</td><td>7.55</td><td>9.68</td></tr>
+<tr><td> 4</td><td><code>deepseek-v4-flash</code></td><td>193</td><td>8.03</td><td>7.75</td><td>8.06</td><td>7.28</td><td>9.05</td></tr>
+<tr><td> 5</td><td><code>qwen3.5-27b</code></td><td>199</td><td>7.52</td><td>7.07</td><td>7.46</td><td>6.53</td><td>9.03</td></tr>
+<tr><td> 6</td><td><code>gemma-4-31b-it</code></td><td>200</td><td>7.45</td><td>7.30</td><td>7.39</td><td>6.14</td><td>8.98</td></tr>
+<tr><td> 7</td><td><code>qwen3.6-27b</code></td><td>200</td><td>6.67</td><td>6.21</td><td>6.31</td><td>5.76</td><td>8.42</td></tr></tbody>
+</table>
+
+<h2>Per-difficulty breakdown</h2>
+<p class="note">Mean overall score per difficulty tier. Rows sorted by overall rank.</p>
+<table id="difficulty">
+  <thead><tr class=""><th>Model</th><th>Basic</th><th>Applied</th><th>Expert</th></tr></thead>
+  <tbody><tr><td><code>claude-opus-4.7</code></td><td>8.91</td><td>9.18</td><td>9.17</td></tr>
+<tr><td><code>gemini-3.1-pro-preview</code></td><td>8.56</td><td>8.98</td><td>9.10</td></tr>
+<tr><td><code>gpt-5.5</code></td><td>8.42</td><td>8.50</td><td>8.78</td></tr>
+<tr><td><code>deepseek-v4-flash</code></td><td>7.93</td><td>8.06</td><td>8.11</td></tr>
+<tr><td><code>qwen3.5-27b</code></td><td>7.18</td><td>7.53</td><td>8.04</td></tr>
+<tr><td><code>gemma-4-31b-it</code></td><td>7.20</td><td>7.48</td><td>7.79</td></tr>
+<tr><td><code>qwen3.6-27b</code></td><td>6.73</td><td>6.71</td><td>6.49</td></tr></tbody>
+</table>
+
+<h2>Per-audience breakdown</h2>
+<p class="note">Russian audience tags from bench question metadata.</p>
+<table id="audience">
+  <thead><tr class=""><th>Model</th><th>АНАЛИТИК</th><th>ВУЗ</th><th>МЕДИК</th><th>СПОРТСМЕН</th><th>СШОР</th><th>ТРЕНЕР</th><th>ФУНКЦИОНЕР</th></tr></thead>
+  <tbody><tr><td><code>claude-opus-4.7</code></td><td>9.13</td><td>9.59</td><td>9.61</td><td>9.59</td><td>8.24</td><td>9.24</td><td>8.87</td></tr>
+<tr><td><code>gemini-3.1-pro-preview</code></td><td>8.88</td><td>9.23</td><td>9.41</td><td>9.27</td><td>8.17</td><td>9.01</td><td>8.66</td></tr>
+<tr><td><code>gpt-5.5</code></td><td>9.12</td><td>9.20</td><td>8.84</td><td>9.23</td><td>7.68</td><td>8.52</td><td>8.37</td></tr>
+<tr><td><code>deepseek-v4-flash</code></td><td>6.50</td><td>8.23</td><td>8.82</td><td>8.46</td><td>7.48</td><td>8.09</td><td>7.85</td></tr>
+<tr><td><code>qwen3.5-27b</code></td><td>6.73</td><td>7.13</td><td>8.95</td><td>8.67</td><td>6.47</td><td>7.72</td><td>7.05</td></tr>
+<tr><td><code>gemma-4-31b-it</code></td><td>7.13</td><td>6.65</td><td>8.44</td><td>8.46</td><td>6.37</td><td>7.65</td><td>7.23</td></tr>
+<tr><td><code>qwen3.6-27b</code></td><td>5.69</td><td>5.28</td><td>7.49</td><td>7.88</td><td>5.73</td><td>6.92</td><td>6.52</td></tr></tbody>
+</table>
+
+<h2>Per-tier breakdown</h2>
+<p class="note">Tier 1 = top 8 sports (50 Q), Tier 2 = 12 sports (15 Q), Tier 3 = 15 sports (5 Q).</p>
+<table id="tier">
+  <thead><tr class=""><th>Model</th><th>tier1</th><th>tier2</th><th>tier3</th></tr></thead>
+  <tbody><tr><td><code>claude-opus-4.7</code></td><td>9.14</td><td>8.98</td><td>9.22</td></tr>
+<tr><td><code>gemini-3.1-pro-preview</code></td><td>8.94</td><td>8.70</td><td>9.00</td></tr>
+<tr><td><code>gpt-5.5</code></td><td>8.62</td><td>8.26</td><td>8.69</td></tr>
+<tr><td><code>deepseek-v4-flash</code></td><td>8.06</td><td>7.95</td><td>8.10</td></tr>
+<tr><td><code>qwen3.5-27b</code></td><td>7.68</td><td>7.08</td><td>7.80</td></tr>
+<tr><td><code>gemma-4-31b-it</code></td><td>7.55</td><td>6.98</td><td>8.08</td></tr>
+<tr><td><code>qwen3.6-27b</code></td><td>6.74</td><td>6.43</td><td>6.91</td></tr></tbody>
+</table>
+
+<h2>RU linguistic dimension</h2>
+<p class="note">ru_linguistic scores (0-10) — language quality independent of factual accuracy.</p>
+<table id="ru-ling">
+  <thead><tr class=""><th>Model</th><th>Overall</th><th>АНАЛИТИК</th><th>ВУЗ</th><th>МЕДИК</th><th>СПОРТСМЕН</th><th>СШОР</th><th>ТРЕНЕР</th><th>ФУНКЦИОНЕР</th></tr></thead>
+  <tbody><tr><td><code>claude-opus-4.7</code></td><td><strong>9.65</strong></td><td>9.25</td><td>9.90</td><td>9.74</td><td>9.70</td><td>9.64</td><td>9.57</td><td>9.68</td></tr>
+<tr><td><code>gemini-3.1-pro-preview</code></td><td><strong>9.74</strong></td><td>9.58</td><td>9.82</td><td>9.86</td><td>9.77</td><td>9.65</td><td>9.72</td><td>9.74</td></tr>
+<tr><td><code>gpt-5.5</code></td><td><strong>9.68</strong></td><td>9.50</td><td>9.90</td><td>9.67</td><td>9.81</td><td>9.62</td><td>9.62</td><td>9.70</td></tr>
+<tr><td><code>deepseek-v4-flash</code></td><td><strong>9.05</strong></td><td>8.17</td><td>8.97</td><td>9.33</td><td>8.88</td><td>9.07</td><td>8.98</td><td>9.17</td></tr>
+<tr><td><code>qwen3.5-27b</code></td><td><strong>9.03</strong></td><td>8.83</td><td>9.05</td><td>9.37</td><td>9.28</td><td>8.67</td><td>9.07</td><td>8.95</td></tr>
+<tr><td><code>gemma-4-31b-it</code></td><td><strong>8.98</strong></td><td>8.50</td><td>8.05</td><td>9.25</td><td>9.11</td><td>9.03</td><td>9.05</td><td>9.01</td></tr>
+<tr><td><code>qwen3.6-27b</code></td><td><strong>8.42</strong></td><td>7.92</td><td>7.27</td><td>8.32</td><td>8.60</td><td>8.64</td><td>8.41</td><td>8.63</td></tr></tbody>
+</table>
+
+<h2>Self-judging bias</h2>
+<p class="note">Auto-detected pairs where candidate === judge. Positive Δ = self-inflation.</p>
+<table id="self-judge">
+  <thead><tr class=""><th>Candidate/Judge</th><th>Self score</th><th>Cross-judge mean</th><th>Δ</th><th>n self</th><th>n cross</th></tr></thead>
+  <tbody><tr><td><code>gemini-3.1-pro-preview</code></td><td>9.40</td><td>8.63</td><td><span class="bias-high">+0.77</span></td><td>200</td><td>400</td></tr>
+<tr><td><code>gpt-5.5</code></td><td>8.36</td><td>8.62</td><td><span>-0.26</span></td><td>200</td><td>400</td></tr>
+<tr><td><code>claude-opus-4.7</code></td><td>9.20</td><td>9.05</td><td><span>+0.15</span></td><td>200</td><td>400</td></tr></tbody>
+</table>
+
+<h2>Top 10 highest-disagreement questions</h2>
+<p class="note">Spread = max judge score − min judge score across the 3-judge ensemble.</p>
+<table id="disagreements">
+  <thead><tr class=""><th>#</th><th>Question</th><th>Candidate</th><th>Mean</th><th>Spread ↓</th><th>Per-judge</th></tr></thead>
+  <tbody><tr><td>1</td><td><code>ТРИ-ДП-001</code></td><td><code>qwen3.6-27b</code></td><td>6.25</td><td><strong>9.75</strong></td><td>claude-opus-4.7: 9.75<br>gpt-5.5: 9.00<br>gemini-3.1-pro-preview: 0.00</td></tr>
+<tr><td>2</td><td><code>ЛЫЖ-ПР-002</code></td><td><code>gpt-5.5</code></td><td>6.00</td><td><strong>9.50</strong></td><td>gemini-3.1-pro-preview: 0.00<br>claude-opus-4.7: 9.50<br>gpt-5.5: 8.50</td></tr>
+<tr><td>3</td><td><code>БАС-СП-002</code></td><td><code>deepseek-v4-flash</code></td><td>6.08</td><td><strong>9.50</strong></td><td>gemini-3.1-pro-preview: 0.00<br>gpt-5.5: 8.75<br>claude-opus-4.7: 9.50</td></tr>
+<tr><td>4</td><td><code>ПЛА-ПР-003</code></td><td><code>gpt-5.5</code></td><td>7.75</td><td><strong>5.75</strong></td><td>gemini-3.1-pro-preview: 10.00<br>claude-opus-4.7: 4.25<br>gpt-5.5: 9.00</td></tr>
+<tr><td>5</td><td><code>ЛЁГ-ФР-006</code></td><td><code>claude-opus-4.7</code></td><td>6.67</td><td><strong>5.50</strong></td><td>gemini-3.1-pro-preview: 10.00<br>claude-opus-4.7: 4.50<br>gpt-5.5: 5.50</td></tr>
+<tr><td>6</td><td><code>ЛЁГ-ПР-007</code></td><td><code>deepseek-v4-flash</code></td><td>6.83</td><td><strong>5.00</strong></td><td>gemini-3.1-pro-preview: 10.00<br>gpt-5.5: 5.50<br>claude-opus-4.7: 5.00</td></tr>
+<tr><td>7</td><td><code>ШАХ-ПР-001</code></td><td><code>qwen3.6-27b</code></td><td>6.92</td><td><strong>4.75</strong></td><td>claude-opus-4.7: 7.00<br>gpt-5.5: 4.50<br>gemini-3.1-pro-preview: 9.25</td></tr>
+<tr><td>8</td><td><code>ХОК-ПР-001</code></td><td><code>gemini-3.1-pro-preview</code></td><td>7.50</td><td><strong>4.50</strong></td><td>gpt-5.5: 5.25<br>gemini-3.1-pro-preview: 9.75<br>claude-opus-4.7: 7.50</td></tr>
+<tr><td>9</td><td><code>ДЗЮ-ПР-003</code></td><td><code>claude-opus-4.7</code></td><td>6.75</td><td><strong>4.50</strong></td><td>gemini-3.1-pro-preview: 9.50<br>claude-opus-4.7: 5.00<br>gpt-5.5: 5.75</td></tr>
+<tr><td>10</td><td><code>ЛЁГ-МТ-009</code></td><td><code>gpt-5.5</code></td><td>6.00</td><td><strong>4.00</strong></td><td>gemini-3.1-pro-preview: 8.50<br>claude-opus-4.7: 5.00<br>gpt-5.5: 4.50</td></tr></tbody>
+</table>
+
+<h2>Methodology</h2>
+<pre>Bench:       ЛИИ-Спорт-Bench-RU v0.1 — 655 Q, 35 sports, 8 cat/sport (Tier-1)
+Pilot:       200-Q stratified sample, seed lii-2026-05-13
+Inference:   OpenRouter, temperature=0, max_tokens=2048, provider.sort=price
+Judges:      3-model ensemble — gemini-3.1-pro-preview, claude-opus-4.7, gpt-5.5
+             temperature=0, JSON mode, max_tokens=4000
+Rubric:      4 dims: accuracy / completeness / bonus / ru_linguistic (0-10 each)
+             overall = mean(4 dims)
+Aggregation: per-question mean across judges → per-bucket mean across questions
+Self-judge:  auto-detected. Leaderboard uses full ensemble; bias section isolates.
+</pre>
+
+</body>
+</html>

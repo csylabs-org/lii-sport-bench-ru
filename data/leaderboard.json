@@ -1,0 +1,746 @@
+{
+  "meta": {
+    "bench": "ЛИИ-Спорт-Bench-RU",
+    "version": "v0.1",
+    "date": "2026-05-18",
+    "generated_at": "2026-05-18T12:33:42.437Z",
+    "n_candidates": 7,
+    "n_questions_pilot": 199,
+    "judges": [
+      "google/gemini-3.1-pro-preview",
+      "anthropic/claude-opus-4.7",
+      "openai/gpt-5.5"
+    ]
+  },
+  "overall": [
+    {
+      "rank": 1,
+      "candidate": "anthropic/claude-opus-4.7",
+      "short_name": "claude-opus-4.7",
+      "n": 200,
+      "overall": 9.1,
+      "accuracy": 8.67,
+      "completeness": 9.16,
+      "bonus": 8.92,
+      "ru_linguistic": 9.65
+    },
+    {
+      "rank": 2,
+      "candidate": "google/gemini-3.1-pro-preview",
+      "short_name": "gemini-3.1-pro-preview",
+      "n": 200,
+      "overall": 8.88,
+      "accuracy": 8.58,
+      "completeness": 8.72,
+      "bonus": 8.49,
+      "ru_linguistic": 9.74
+    },
+    {
+      "rank": 3,
+      "candidate": "openai/gpt-5.5",
+      "short_name": "gpt-5.5",
+      "n": 200,
+      "overall": 8.53,
+      "accuracy": 8.54,
+      "completeness": 8.35,
+      "bonus": 7.55,
+      "ru_linguistic": 9.68
+    },
+    {
+      "rank": 4,
+      "candidate": "deepseek/deepseek-v4-flash",
+      "short_name": "deepseek-v4-flash",
+      "n": 193,
+      "overall": 8.03,
+      "accuracy": 7.75,
+      "completeness": 8.06,
+      "bonus": 7.28,
+      "ru_linguistic": 9.05
+    },
+    {
+      "rank": 5,
+      "candidate": "qwen/qwen3.5-27b",
+      "short_name": "qwen3.5-27b",
+      "n": 199,
+      "overall": 7.52,
+      "accuracy": 7.07,
+      "completeness": 7.46,
+      "bonus": 6.53,
+      "ru_linguistic": 9.03
+    },
+    {
+      "rank": 6,
+      "candidate": "google/gemma-4-31b-it",
+      "short_name": "gemma-4-31b-it",
+      "n": 200,
+      "overall": 7.45,
+      "accuracy": 7.3,
+      "completeness": 7.39,
+      "bonus": 6.14,
+      "ru_linguistic": 8.98
+    },
+    {
+      "rank": 7,
+      "candidate": "qwen/qwen3.6-27b",
+      "short_name": "qwen3.6-27b",
+      "n": 200,
+      "overall": 6.67,
+      "accuracy": 6.21,
+      "completeness": 6.31,
+      "bonus": 5.76,
+      "ru_linguistic": 8.42
+    }
+  ],
+  "per_difficulty": [
+    {
+      "candidate": "anthropic/claude-opus-4.7",
+      "short_name": "claude-opus-4.7",
+      "buckets": {
+        "Basic": 8.91,
+        "Applied": 9.18,
+        "Expert": 9.17
+      }
+    },
+    {
+      "candidate": "google/gemini-3.1-pro-preview",
+      "short_name": "gemini-3.1-pro-preview",
+      "buckets": {
+        "Basic": 8.56,
+        "Applied": 8.98,
+        "Expert": 9.1
+      }
+    },
+    {
+      "candidate": "openai/gpt-5.5",
+      "short_name": "gpt-5.5",
+      "buckets": {
+        "Basic": 8.42,
+        "Applied": 8.5,
+        "Expert": 8.78
+      }
+    },
+    {
+      "candidate": "deepseek/deepseek-v4-flash",
+      "short_name": "deepseek-v4-flash",
+      "buckets": {
+        "Basic": 7.93,
+        "Applied": 8.06,
+        "Expert": 8.11
+      }
+    },
+    {
+      "candidate": "qwen/qwen3.5-27b",
+      "short_name": "qwen3.5-27b",
+      "buckets": {
+        "Basic": 7.18,
+        "Applied": 7.53,
+        "Expert": 8.04
+      }
+    },
+    {
+      "candidate": "google/gemma-4-31b-it",
+      "short_name": "gemma-4-31b-it",
+      "buckets": {
+        "Basic": 7.2,
+        "Applied": 7.48,
+        "Expert": 7.79
+      }
+    },
+    {
+      "candidate": "qwen/qwen3.6-27b",
+      "short_name": "qwen3.6-27b",
+      "buckets": {
+        "Basic": 6.73,
+        "Applied": 6.71,
+        "Expert": 6.49
+      }
+    }
+  ],
+  "per_audience": [
+    {
+      "candidate": "anthropic/claude-opus-4.7",
+      "short_name": "claude-opus-4.7",
+      "buckets": {
+        "АНАЛИТИК": 9.13,
+        "ВУЗ": 9.59,
+        "МЕДИК": 9.61,
+        "СПОРТСМЕН": 9.59,
+        "СШОР": 8.24,
+        "ТРЕНЕР": 9.24,
+        "ФУНКЦИОНЕР": 8.87
+      }
+    },
+    {
+      "candidate": "google/gemini-3.1-pro-preview",
+      "short_name": "gemini-3.1-pro-preview",
+      "buckets": {
+        "АНАЛИТИК": 8.88,
+        "ВУЗ": 9.23,
+        "МЕДИК": 9.41,
+        "СПОРТСМЕН": 9.27,
+        "СШОР": 8.17,
+        "ТРЕНЕР": 9.01,
+        "ФУНКЦИОНЕР": 8.66
+      }
+    },
+    {
+      "candidate": "openai/gpt-5.5",
+      "short_name": "gpt-5.5",
+      "buckets": {
+        "АНАЛИТИК": 9.12,
+        "ВУЗ": 9.2,
+        "МЕДИК": 8.84,
+        "СПОРТСМЕН": 9.23,
+        "СШОР": 7.68,
+        "ТРЕНЕР": 8.52,
+        "ФУНКЦИОНЕР": 8.37
+      }
+    },
+    {
+      "candidate": "deepseek/deepseek-v4-flash",
+      "short_name": "deepseek-v4-flash",
+      "buckets": {
+        "АНАЛИТИК": 6.5,
+        "ВУЗ": 8.23,
+        "МЕДИК": 8.82,
+        "СПОРТСМЕН": 8.46,
+        "СШОР": 7.48,
+        "ТРЕНЕР": 8.09,
+        "ФУНКЦИОНЕР": 7.85
+      }
+    },
+    {
+      "candidate": "qwen/qwen3.5-27b",
+      "short_name": "qwen3.5-27b",
+      "buckets": {
+        "АНАЛИТИК": 6.73,
+        "ВУЗ": 7.13,
+        "МЕДИК": 8.95,
+        "СПОРТСМЕН": 8.67,
+        "СШОР": 6.47,
+        "ТРЕНЕР": 7.72,
+        "ФУНКЦИОНЕР": 7.05
+      }
+    },
+    {
+      "candidate": "google/gemma-4-31b-it",
+      "short_name": "gemma-4-31b-it",
+      "buckets": {
+        "АНАЛИТИК": 7.13,
+        "ВУЗ": 6.65,
+        "МЕДИК": 8.44,
+        "СПОРТСМЕН": 8.46,
+        "СШОР": 6.37,
+        "ТРЕНЕР": 7.65,
+        "ФУНКЦИОНЕР": 7.23
+      }
+    },
+    {
+      "candidate": "qwen/qwen3.6-27b",
+      "short_name": "qwen3.6-27b",
+      "buckets": {
+        "АНАЛИТИК": 5.69,
+        "ВУЗ": 5.28,
+        "МЕДИК": 7.49,
+        "СПОРТСМЕН": 7.88,
+        "СШОР": 5.73,
+        "ТРЕНЕР": 6.92,
+        "ФУНКЦИОНЕР": 6.52
+      }
+    }
+  ],
+  "per_tier": [
+    {
+      "candidate": "anthropic/claude-opus-4.7",
+      "short_name": "claude-opus-4.7",
+      "buckets": {
+        "tier1": 9.14,
+        "tier2": 8.98,
+        "tier3": 9.22
+      }
+    },
+    {
+      "candidate": "google/gemini-3.1-pro-preview",
+      "short_name": "gemini-3.1-pro-preview",
+      "buckets": {
+        "tier1": 8.94,
+        "tier2": 8.7,
+        "tier3": 9
+      }
+    },
+    {
+      "candidate": "openai/gpt-5.5",
+      "short_name": "gpt-5.5",
+      "buckets": {
+        "tier1": 8.62,
+        "tier2": 8.26,
+        "tier3": 8.69
+      }
+    },
+    {
+      "candidate": "deepseek/deepseek-v4-flash",
+      "short_name": "deepseek-v4-flash",
+      "buckets": {
+        "tier1": 8.06,
+        "tier2": 7.95,
+        "tier3": 8.1
+      }
+    },
+    {
+      "candidate": "qwen/qwen3.5-27b",
+      "short_name": "qwen3.5-27b",
+      "buckets": {
+        "tier1": 7.68,
+        "tier2": 7.08,
+        "tier3": 7.8
+      }
+    },
+    {
+      "candidate": "google/gemma-4-31b-it",
+      "short_name": "gemma-4-31b-it",
+      "buckets": {
+        "tier1": 7.55,
+        "tier2": 6.98,
+        "tier3": 8.08
+      }
+    },
+    {
+      "candidate": "qwen/qwen3.6-27b",
+      "short_name": "qwen3.6-27b",
+      "buckets": {
+        "tier1": 6.74,
+        "tier2": 6.43,
+        "tier3": 6.91
+      }
+    }
+  ],
+  "ru_linguistic": [
+    {
+      "candidate": "anthropic/claude-opus-4.7",
+      "short_name": "claude-opus-4.7",
+      "overall": 9.65,
+      "by_audience": {
+        "АНАЛИТИК": 9.25,
+        "ВУЗ": 9.9,
+        "МЕДИК": 9.74,
+        "СПОРТСМЕН": 9.7,
+        "СШОР": 9.64,
+        "ТРЕНЕР": 9.57,
+        "ФУНКЦИОНЕР": 9.68
+      }
+    },
+    {
+      "candidate": "google/gemini-3.1-pro-preview",
+      "short_name": "gemini-3.1-pro-preview",
+      "overall": 9.74,
+      "by_audience": {
+        "АНАЛИТИК": 9.58,
+        "ВУЗ": 9.82,
+        "МЕДИК": 9.86,
+        "СПОРТСМЕН": 9.77,
+        "СШОР": 9.65,
+        "ТРЕНЕР": 9.72,
+        "ФУНКЦИОНЕР": 9.74
+      }
+    },
+    {
+      "candidate": "openai/gpt-5.5",
+      "short_name": "gpt-5.5",
+      "overall": 9.68,
+      "by_audience": {
+        "АНАЛИТИК": 9.5,
+        "ВУЗ": 9.9,
+        "МЕДИК": 9.67,
+        "СПОРТСМЕН": 9.81,
+        "СШОР": 9.62,
+        "ТРЕНЕР": 9.62,
+        "ФУНКЦИОНЕР": 9.7
+      }
+    },
+    {
+      "candidate": "deepseek/deepseek-v4-flash",
+      "short_name": "deepseek-v4-flash",
+      "overall": 9.05,
+      "by_audience": {
+        "АНАЛИТИК": 8.17,
+        "ВУЗ": 8.97,
+        "МЕДИК": 9.33,
+        "СПОРТСМЕН": 8.88,
+        "СШОР": 9.07,
+        "ТРЕНЕР": 8.98,
+        "ФУНКЦИОНЕР": 9.17
+      }
+    },
+    {
+      "candidate": "qwen/qwen3.5-27b",
+      "short_name": "qwen3.5-27b",
+      "overall": 9.03,
+      "by_audience": {
+        "АНАЛИТИК": 8.83,
+        "ВУЗ": 9.05,
+        "МЕДИК": 9.37,
+        "СПОРТСМЕН": 9.28,
+        "СШОР": 8.67,
+        "ТРЕНЕР": 9.07,
+        "ФУНКЦИОНЕР": 8.95
+      }
+    },
+    {
+      "candidate": "google/gemma-4-31b-it",
+      "short_name": "gemma-4-31b-it",
+      "overall": 8.98,
+      "by_audience": {
+        "АНАЛИТИК": 8.5,
+        "ВУЗ": 8.05,
+        "МЕДИК": 9.25,
+        "СПОРТСМЕН": 9.11,
+        "СШОР": 9.03,
+        "ТРЕНЕР": 9.05,
+        "ФУНКЦИОНЕР": 9.01
+      }
+    },
+    {
+      "candidate": "qwen/qwen3.6-27b",
+      "short_name": "qwen3.6-27b",
+      "overall": 8.42,
+      "by_audience": {
+        "АНАЛИТИК": 7.92,
+        "ВУЗ": 7.27,
+        "МЕДИК": 8.32,
+        "СПОРТСМЕН": 8.6,
+        "СШОР": 8.64,
+        "ТРЕНЕР": 8.41,
+        "ФУНКЦИОНЕР": 8.63
+      }
+    }
+  ],
+  "self_judge_bias": [
+    {
+      "candidate": "google/gemini-3.1-pro-preview",
+      "self_score": 9.4,
+      "cross_score": 8.63,
+      "delta": 0.77,
+      "n_self": 200,
+      "n_cross": 400
+    },
+    {
+      "candidate": "openai/gpt-5.5",
+      "self_score": 8.36,
+      "cross_score": 8.62,
+      "delta": -0.26,
+      "n_self": 200,
+      "n_cross": 400
+    },
+    {
+      "candidate": "anthropic/claude-opus-4.7",
+      "self_score": 9.2,
+      "cross_score": 9.05,
+      "delta": 0.15,
+      "n_self": 200,
+      "n_cross": 400
+    }
+  ],
+  "top_disagreements": [
+    {
+      "rank": 1,
+      "question_id": "ТРИ-ДП-001",
+      "candidate": "qwen/qwen3.6-27b",
+      "short_name": "qwen3.6-27b",
+      "mean_overall": 6.25,
+      "spread": 9.75,
+      "per_judge": [
+        {
+          "judge": "anthropic/claude-opus-4.7",
+          "short_name": "claude-opus-4.7",
+          "overall": 9.75
+        },
+        {
+          "judge": "openai/gpt-5.5",
+          "short_name": "gpt-5.5",
+          "overall": 9
+        },
+        {
+          "judge": "google/gemini-3.1-pro-preview",
+          "short_name": "gemini-3.1-pro-preview",
+          "overall": 0
+        }
+      ]
+    },
+    {
+      "rank": 2,
+      "question_id": "ЛЫЖ-ПР-002",
+      "candidate": "openai/gpt-5.5",
+      "short_name": "gpt-5.5",
+      "mean_overall": 6,
+      "spread": 9.5,
+      "per_judge": [
+        {
+          "judge": "google/gemini-3.1-pro-preview",
+          "short_name": "gemini-3.1-pro-preview",
+          "overall": 0
+        },
+        {
+          "judge": "anthropic/claude-opus-4.7",
+          "short_name": "claude-opus-4.7",
+          "overall": 9.5
+        },
+        {
+          "judge": "openai/gpt-5.5",
+          "short_name": "gpt-5.5",
+          "overall": 8.5
+        }
+      ]
+    },
+    {
+      "rank": 3,
+      "question_id": "БАС-СП-002",
+      "candidate": "deepseek/deepseek-v4-flash",
+      "short_name": "deepseek-v4-flash",
+      "mean_overall": 6.08,
+      "spread": 9.5,
+      "per_judge": [
+        {
+          "judge": "google/gemini-3.1-pro-preview",
+          "short_name": "gemini-3.1-pro-preview",
+          "overall": 0
+        },
+        {
+          "judge": "openai/gpt-5.5",
+          "short_name": "gpt-5.5",
+          "overall": 8.75
+        },
+        {
+          "judge": "anthropic/claude-opus-4.7",
+          "short_name": "claude-opus-4.7",
+          "overall": 9.5
+        }
+      ]
+    },
+    {
+      "rank": 4,
+      "question_id": "ПЛА-ПР-003",
+      "candidate": "openai/gpt-5.5",
+      "short_name": "gpt-5.5",
+      "mean_overall": 7.75,
+      "spread": 5.75,
+      "per_judge": [
+        {
+          "judge": "google/gemini-3.1-pro-preview",
+          "short_name": "gemini-3.1-pro-preview",
+          "overall": 10
+        },
+        {
+          "judge": "anthropic/claude-opus-4.7",
+          "short_name": "claude-opus-4.7",
+          "overall": 4.25
+        },
+        {
+          "judge": "openai/gpt-5.5",
+          "short_name": "gpt-5.5",
+          "overall": 9
+        }
+      ]
+    },
+    {
+      "rank": 5,
+      "question_id": "ЛЁГ-ФР-006",
+      "candidate": "anthropic/claude-opus-4.7",
+      "short_name": "claude-opus-4.7",
+      "mean_overall": 6.67,
+      "spread": 5.5,
+      "per_judge": [
+        {
+          "judge": "google/gemini-3.1-pro-preview",
+          "short_name": "gemini-3.1-pro-preview",
+          "overall": 10
+        },
+        {
+          "judge": "anthropic/claude-opus-4.7",
+          "short_name": "claude-opus-4.7",
+          "overall": 4.5
+        },
+        {
+          "judge": "openai/gpt-5.5",
+          "short_name": "gpt-5.5",
+          "overall": 5.5
+        }
+      ]
+    },
+    {
+      "rank": 6,
+      "question_id": "ЛЁГ-ПР-007",
+      "candidate": "deepseek/deepseek-v4-flash",
+      "short_name": "deepseek-v4-flash",
+      "mean_overall": 6.83,
+      "spread": 5,
+      "per_judge": [
+        {
+          "judge": "google/gemini-3.1-pro-preview",
+          "short_name": "gemini-3.1-pro-preview",
+          "overall": 10
+        },
+        {
+          "judge": "openai/gpt-5.5",
+          "short_name": "gpt-5.5",
+          "overall": 5.5
+        },
+        {
+          "judge": "anthropic/claude-opus-4.7",
+          "short_name": "claude-opus-4.7",
+          "overall": 5
+        }
+      ]
+    },
+    {
+      "rank": 7,
+      "question_id": "ШАХ-ПР-001",
+      "candidate": "qwen/qwen3.6-27b",
+      "short_name": "qwen3.6-27b",
+      "mean_overall": 6.92,
+      "spread": 4.75,
+      "per_judge": [
+        {
+          "judge": "anthropic/claude-opus-4.7",
+          "short_name": "claude-opus-4.7",
+          "overall": 7
+        },
+        {
+          "judge": "openai/gpt-5.5",
+          "short_name": "gpt-5.5",
+          "overall": 4.5
+        },
+        {
+          "judge": "google/gemini-3.1-pro-preview",
+          "short_name": "gemini-3.1-pro-preview",
+          "overall": 9.25
+        }
+      ]
+    },
+    {
+      "rank": 8,
+      "question_id": "ХОК-ПР-001",
+      "candidate": "google/gemini-3.1-pro-preview",
+      "short_name": "gemini-3.1-pro-preview",
+      "mean_overall": 7.5,
+      "spread": 4.5,
+      "per_judge": [
+        {
+          "judge": "openai/gpt-5.5",
+          "short_name": "gpt-5.5",
+          "overall": 5.25
+        },
+        {
+          "judge": "google/gemini-3.1-pro-preview",
+          "short_name": "gemini-3.1-pro-preview",
+          "overall": 9.75
+        },
+        {
+          "judge": "anthropic/claude-opus-4.7",
+          "short_name": "claude-opus-4.7",
+          "overall": 7.5
+        }
+      ]
+    },
+    {
+      "rank": 9,
+      "question_id": "ДЗЮ-ПР-003",
+      "candidate": "anthropic/claude-opus-4.7",
+      "short_name": "claude-opus-4.7",
+      "mean_overall": 6.75,
+      "spread": 4.5,
+      "per_judge": [
+        {
+          "judge": "google/gemini-3.1-pro-preview",
+          "short_name": "gemini-3.1-pro-preview",
+          "overall": 9.5
+        },
+        {
+          "judge": "anthropic/claude-opus-4.7",
+          "short_name": "claude-opus-4.7",
+          "overall": 5
+        },
+        {
+          "judge": "openai/gpt-5.5",
+          "short_name": "gpt-5.5",
+          "overall": 5.75
+        }
+      ]
+    },
+    {
+      "rank": 10,
+      "question_id": "ЛЁГ-МТ-009",
+      "candidate": "openai/gpt-5.5",
+      "short_name": "gpt-5.5",
+      "mean_overall": 6,
+      "spread": 4,
+      "per_judge": [
+        {
+          "judge": "google/gemini-3.1-pro-preview",
+          "short_name": "gemini-3.1-pro-preview",
+          "overall": 8.5
+        },
+        {
+          "judge": "anthropic/claude-opus-4.7",
+          "short_name": "claude-opus-4.7",
+          "overall": 5
+        },
+        {
+          "judge": "openai/gpt-5.5",
+          "short_name": "gpt-5.5",
+          "overall": 4.5
+        }
+      ]
+    }
+  ],
+  "judge_agreement_flagged": [
+    {
+      "candidate": "anthropic/claude-opus-4.7",
+      "short_name": "claude-opus-4.7",
+      "flagged": 26,
+      "total": 199,
+      "pct": 13.1
+    },
+    {
+      "candidate": "google/gemini-3.1-pro-preview",
+      "short_name": "gemini-3.1-pro-preview",
+      "flagged": 26,
+      "total": 199,
+      "pct": 13.1
+    },
+    {
+      "candidate": "openai/gpt-5.5",
+      "short_name": "gpt-5.5",
+      "flagged": 8,
+      "total": 199,
+      "pct": 4
+    },
+    {
+      "candidate": "deepseek/deepseek-v4-flash",
+      "short_name": "deepseek-v4-flash",
+      "flagged": 40,
+      "total": 199,
+      "pct": 20.1
+    },
+    {
+      "candidate": "qwen/qwen3.5-27b",
+      "short_name": "qwen3.5-27b",
+      "flagged": 29,
+      "total": 199,
+      "pct": 14.6
+    },
+    {
+      "candidate": "google/gemma-4-31b-it",
+      "short_name": "gemma-4-31b-it",
+      "flagged": 14,
+      "total": 199,
+      "pct": 7
+    },
+    {
+      "candidate": "qwen/qwen3.6-27b",
+      "short_name": "qwen3.6-27b",
+      "flagged": 50,
+      "total": 199,
+      "pct": 25.1
+    }
+  ]
+}

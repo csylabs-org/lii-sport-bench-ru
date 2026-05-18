@@ -1,6 +1,10 @@
 # ЛИИ-Спорт-Bench-RU
 
+[![Habr article](https://img.shields.io/badge/Habr-1036448-orange)](https://habr.com/ru/articles/1036448/) [![License: MIT](https://img.shields.io/badge/code-MIT-blue.svg)](./LICENSE) [![Data License: Apache 2.0](https://img.shields.io/badge/data-Apache_2.0-green.svg)](./LICENSE)
+
 **The first open benchmark for evaluating Large Language Models on Russian-language sports-domain expertise.**
+
+📖 **Featured article (Habr, RU, May 2026):** https://habr.com/ru/articles/1036448/  «Прогнали семь LLM через свой русский спортивный бенчмарк. Frontier-closed выигрывает 1.5-1.7 балла. Базовой моделью всё равно остаётся Gemma 4 31B — рассказываю почему.»
 
 ЛИИ-Спорт-Bench-RU tests LLMs on 655 expert-level questions across 35 sports, designed to surface practical capability gaps for: federation officials (functionaries), coaches, athletes, sports physicians, analysts, sports schools (СШОР), and physical-culture universities (ВУЗы).
 
