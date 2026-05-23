@@ -40,7 +40,7 @@ class CorpusPrepPipelineTests(unittest.TestCase):
         self.assertEqual(len(chunks), 4)
         self.assertEqual([chunk["source_id"] for chunk in chunks].count("football"), 2)
         self.assertEqual([chunk["source_id"] for chunk in chunks].count("volleyball"), 2)
-        self.assertTrue(all(chunk["chunk_strategy"] == "even-window-v1" for chunk in chunks))
+        self.assertTrue(all(chunk["chunk_strategy"] == "doc-balanced-even-window-v2" for chunk in chunks))
         self.assertIn("football-0", chunks[0]["text"])
         self.assertIn("football-1199", chunks[1]["text"])
 
@@ -50,8 +50,64 @@ class CorpusPrepPipelineTests(unittest.TestCase):
             chunk_chars=1200,
             min_chars=200,
             source_ids={"volleyball"},
+            batch_id="balanced-01",
         )
         self.assertEqual({chunk["source_id"] for chunk in filtered}, {"volleyball"})
+        self.assertTrue(all("-balanced-01-section-" in chunk["id"] for chunk in filtered))
+
+    def test_chunk_raw_examples_round_robins_documents_within_source(self):
+        from corpus_prep.chunk import chunk_raw_examples
+
+        rows = [
+            {
+                "id": "minsport-doc-a",
+                "source_id": "minsport",
+                "license_kind": "public-domain",
+                "license_verified": True,
+                "text": " ".join(f"doc-a-{index}" for index in range(1200)),
+            },
+            {
+                "id": "minsport-doc-b",
+                "source_id": "minsport",
+                "license_kind": "public-domain",
+                "license_verified": True,
+                "text": " ".join(f"doc-b-{index}" for index in range(1200)),
+            },
+        ]
+
+        chunks = chunk_raw_examples(rows, chunks_per_source=4, chunk_chars=1200, min_chars=200)
+
+        self.assertEqual([chunk["id"] for chunk in chunks], [
+            "minsport-doc-a-section-01",
+            "minsport-doc-b-section-01",
+            "minsport-doc-a-section-02",
+            "minsport-doc-b-section-02",
+        ])
+
+    def test_chunk_raw_examples_skips_existing_chunks_by_default(self):
+        from corpus_prep.chunk import chunk_raw_examples
+
+        rows = [
+            {
+                "id": "source-doc",
+                "source_id": "minsport",
+                "license_kind": "public-domain",
+                "license_verified": True,
+                "text": " ".join(f"source-{index}" for index in range(1200)),
+            },
+            {
+                "id": "source-doc-section-01",
+                "source_id": "minsport",
+                "license_kind": "public-domain",
+                "license_verified": True,
+                "chunk_strategy": "doc-balanced-even-window-v2",
+                "text": " ".join(f"chunk-{index}" for index in range(1200)),
+            },
+        ]
+
+        chunks = chunk_raw_examples(rows, chunks_per_source=2, chunk_chars=1200, min_chars=200)
+
+        self.assertTrue(all(not chunk["id"].startswith("source-doc-section-01-section") for chunk in chunks))
 
     def test_source_registry_marks_federation_rules_for_human_approval(self):
         from corpus_prep.registry import load_sources
@@ -61,6 +117,34 @@ class CorpusPrepPipelineTests(unittest.TestCase):
 
         self.assertTrue(fed_rules["requires_human_approval"])
         self.assertEqual(fed_rules["license_kind"], "license-check-required")
+
+    def test_coverage_report_tracks_license_and_undercoverage(self):
+        from corpus_prep.coverage import build_coverage_report
+
+        report = build_coverage_report(
+            [
+                {
+                    "source_id": "fed-rules",
+                    "sport": "volleyball",
+                    "category": "rules",
+                    "license_kind": "human-approved-federation-public-doc",
+                    "requires_human_approval": True,
+                },
+                {
+                    "source_id": "history",
+                    "sport": "general",
+                    "category": "history",
+                    "license_kind": "cc-by-article",
+                    "requires_human_approval": False,
+                },
+            ]
+        )
+
+        self.assertEqual(report["total_examples"], 2)
+        self.assertEqual(report["by_license_lane"]["human-approved-internal"], 1)
+        self.assertEqual(report["by_license_lane"]["open-license"], 1)
+        self.assertIn("below_sft_gate_5k", report["undercovered_flags"])
+        self.assertIn("winter_sports_missing", report["undercovered_flags"])
 
     def test_clean_pipeline_drops_pii_and_bench_leakage(self):
         from corpus_prep.clean import clean_examples
@@ -940,6 +1024,11 @@ class CorpusPrepPipelineTests(unittest.TestCase):
         self.assertNotIn("+7 999", examples[0]["text"])
         self.assertNotIn("+7 999", examples[0]["source_excerpt"])
         self.assertIn("[PHONE]", examples[0]["source_excerpt"])
+
+    def test_scrub_extraction_noise_removes_pdf_replacement_runs(self):
+        from corpus_prep.synthesize import scrub_extraction_noise
+
+        self.assertEqual(scrub_extraction_noise("Раздел 01 \ufffd\ufffd\ufffd\ufffd 25"), "Раздел 01 25")
 
     def test_synthesis_masks_parenthesized_ru_phone(self):
         from corpus_prep.synthesize import scrub_pii

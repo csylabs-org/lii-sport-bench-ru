@@ -79,7 +79,13 @@ def scrub_pii(text: str) -> str:
     text = re.sub(r"(?<!\d)(?:\+7|8)[\s\-()]*\d{3}[\s\-()]*\d{3}[\s\-()]*\d{2}[\s\-()]*\d{2}(?!\d)", "[PHONE]", text)
     text = re.sub(r"[\w.+-]+@[\w-]+\.[\w.-]+", "[EMAIL]", text)
     text = re.sub(r"\b\d{3}-\d{3}-\d{3}\s?\d{2}\b", "[SNILS]", text)
-    return text
+    return scrub_extraction_noise(text)
+
+
+def scrub_extraction_noise(text: str) -> str:
+    text = re.sub(r"[\u0008\ufffd]{2,}", " ", text)
+    text = re.sub(r"(?:\s*\ufffd\s*){2,}", " ", text)
+    return re.sub(r"\s+", " ", text).strip()
 
 
 def write_synthesized_jsonl(path: Path, examples: list[dict[str, Any]]) -> None:
