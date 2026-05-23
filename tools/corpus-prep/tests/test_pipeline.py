@@ -544,7 +544,10 @@ class CorpusPrepPipelineTests(unittest.TestCase):
             (web / "history.html").write_text(
                 "<html><head><title>История федерации</title></head><body>"
                 "<h1>История федерации</h1>"
-                f"<p>{'Развитие физической культуры и спорта в регионе. ' * 12}</p>"
+                "<p>В 1913 году появились первые устойчивые спортивные общества региона.</p>"
+                "<p>В 1950 году федерация расширила календарь соревнований и подготовку судей.</p>"
+                "<p>В 1980 году спортсмены региона участвовали в крупных всесоюзных стартах.</p>"
+                "<p>В 2025 году федерация сохраняет систему подготовки и региональные турниры.</p>"
                 "</body></html>",
                 encoding="utf-8",
             )
@@ -566,7 +569,71 @@ class CorpusPrepPipelineTests(unittest.TestCase):
             self.assertEqual(rows[0]["approved_by"], "Daniel Ivanov")
             self.assertEqual(rows[0]["approval_note"], "approved for internal corpus")
             self.assertEqual(rows[0]["license_kind"], "human-approved-official-history-public-doc")
-            self.assertIn("Развитие физической культуры", rows[0]["text"])
+            self.assertIn("1913 году", rows[0]["text"])
+
+    def test_official_history_static_prefers_main_content_over_navigation(self):
+        from corpus_prep.harvest import harvest_official_history_static
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            web = root / "web"
+            web.mkdir()
+            (web / "history.html").write_text(
+                "<html><head><title>История клуба</title></head><body>"
+                "<header>Медиа Новости Документы Контакты Закупки Личный кабинет</header>"
+                "<main><article><h1>История клуба</h1>"
+                "<p>В 1960 году спортивный клуб начал системную подготовку сборной команды.</p>"
+                "<p>В 1975 году клуб открыл отделение для юношеского спорта и методической работы.</p>"
+                "<p>В 1992 году клуб перестроил календарь стартов под российскую систему соревнований.</p>"
+                "<p>В 2024 году клуб развивает подготовку резерва и проводит региональные турниры.</p>"
+                "</article></main>"
+                "<footer>Контакты Закупки Реклама</footer>"
+                "</body></html>",
+                encoding="utf-8",
+            )
+            source = {
+                "id": "sport-history-official-approved",
+                "endpoint": [(web / "history.html").as_uri()],
+                "harvester": "official_history_static",
+                "license_kind": "human-approved-official-history-public-doc",
+                "license_verified": True,
+                "requires_human_approval": True,
+                "bench_categories": ["history"],
+            }
+
+            rows = harvest_official_history_static(source, root, max_pages=1, delay_seconds=0)
+
+            self.assertEqual(len(rows), 1)
+            self.assertIn("1960 году", rows[0]["text"])
+            self.assertNotIn("Личный кабинет", rows[0]["text"])
+
+    def test_wikidata_sport_fact_row_builds_cc0_training_text(self):
+        from corpus_prep.harvest import _wikidata_sport_fact_row
+
+        source = {
+            "id": "sport-facts-wikidata-cc0",
+            "license_kind": "cc0",
+            "license_verified": True,
+            "requires_human_approval": False,
+            "bench_categories": ["history", "rules"],
+        }
+        binding = {
+            "item": {"value": "https://www.wikidata.org/entity/Q1"},
+            "itemLabel": {"value": "Тестовый спортсмен"},
+            "sportLabel": {"value": "хоккей с шайбой"},
+            "countryLabel": {"value": "Россия"},
+            "dob": {"value": "1988-01-02T00:00:00Z"},
+            "article": {"value": "https://ru.wikipedia.org/wiki/Test"},
+        }
+
+        row = _wikidata_sport_fact_row(source, binding)
+
+        self.assertIsNotNone(row)
+        self.assertEqual(row["license_kind"], "cc0")
+        self.assertFalse(row["requires_human_approval"])
+        self.assertEqual(row["sport"], "hockey")
+        self.assertIn("1988", row["text"])
+        self.assertGreaterEqual(len(row["text"]), 200)
 
     def test_federation_rules_harvest_skips_seen_candidates_before_limit(self):
         from corpus_prep.harvest import harvest_federation_rules

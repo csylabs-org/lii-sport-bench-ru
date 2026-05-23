@@ -104,10 +104,10 @@
   - `3` generated examples through `agy`
   - `3` kept after cleaning
 - Combined current retained release:
-  - `312` generated examples
-  - `312` kept after cleaning
-  - split: `288 train / 13 val / 11 test`
-  - source mix: `87` RUSADA, `9` EVSK/EKP, `63` MinSport federal standards, `36` Лесгафта, `72` CC BY CyberLeninka sport-history rows, `15` official/internal history rows, `12` FHR hockey rules, `3` VFR volleyball rules, `3` RFB basketball rules, `3` swimming rules, `3` RFS football rules, `3` RusAthletics rules, `3` sport gymnastics rules
+  - `360` generated examples
+  - `360` kept after cleaning
+  - split: `332 train / 16 val / 12 test`
+  - source mix: `87` RUSADA, `9` EVSK/EKP, `63` MinSport federal standards, `36` Лесгафта, `72` CC BY CyberLeninka sport-history rows, `48` Wikidata CC0 sport-fact rows, `15` official/internal history rows, `12` FHR hockey rules, `3` VFR volleyball rules, `3` RFB basketball rules, `3` swimming rules, `3` RFS football rules, `3` RusAthletics rules, `3` sport gymnastics rules
 - Documented scale-up boundary:
   - current federation rows are source-validation smoke rows
   - production corpus generation should first complete official PDF inventory, then run section/page chunked synthesis over clean extracted text
@@ -128,7 +128,13 @@
   - first 5 federation/official history pages harvested behind `--include-human-approval`
   - `15` generated history examples through `agy`
   - `15` kept after cleaning
-  - extraction is acceptable for smoke, but needs cleaner page-content filtering before production scale
+  - main-content extraction now prefers `main`/`article`/content blocks and trims common official-page navigation boilerplate
+- Added Wikidata CC0 sport-facts lane:
+  - source id: `sport-facts-wikidata-cc0`
+  - first 16 Russian/Soviet athlete fact records harvested from Wikidata SPARQL
+  - `48` generated history/factual examples through `agy`
+  - `48` kept after cleaning
+  - next scale-up should diversify by sport/event instead of relying on one broad athlete query
 
 ### A/B result
 

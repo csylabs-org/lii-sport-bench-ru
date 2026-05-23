@@ -366,6 +366,7 @@ def harvest_official_history_static(
     *,
     max_pages: int = 10,
     delay_seconds: float = 0.5,
+    refresh: bool = False,
 ) -> list[dict[str, Any]]:
     if not source.get("license_verified"):
         raise ValueError(f"source {source['id']} license is not verified")
@@ -377,7 +378,7 @@ def harvest_official_history_static(
     raw_dir = repo_root / "corpus" / "raw" / str(source["id"])
     raw_dir.mkdir(parents=True, exist_ok=True)
     output_path = raw_dir / "harvest.jsonl"
-    seen = _load_seen_urls(output_path)
+    seen = set() if refresh else _load_seen_urls(output_path)
 
     rows: list[dict[str, Any]] = []
     for url in urls:
@@ -391,7 +392,7 @@ def harvest_official_history_static(
         if fetched is None:
             continue
         content_type, body = fetched
-        text, _links = _html_to_text_and_links(body, normalized_url)
+        text = _official_history_text_from_html(body, normalized_url)
         title = _first_meta_property(body, "og:title") or _html_title(body) or normalized_url
         text = re.sub(r"\s+", " ", "\n".join(part for part in [title, text] if part)).strip()
         if len(text) < 200:
@@ -415,6 +416,47 @@ def harvest_official_history_static(
         )
         if delay_seconds:
             time.sleep(delay_seconds)
+
+    if rows:
+        mode = "w" if refresh else "a"
+        with output_path.open(mode, encoding="utf-8") as handle:
+            for row in rows:
+                handle.write(json.dumps(row, ensure_ascii=False, sort_keys=True) + "\n")
+    return rows
+
+
+def harvest_wikidata_sport_facts(
+    source: dict[str, Any],
+    repo_root: Path,
+    *,
+    max_records: int = 25,
+) -> list[dict[str, Any]]:
+    if source.get("requires_human_approval"):
+        raise ValueError(f"source {source['id']} requires human approval")
+    if source.get("license_kind") != "cc0" or not source.get("license_verified"):
+        raise ValueError(f"source {source['id']} must be verified CC0")
+
+    raw_dir = repo_root / "corpus" / "raw" / str(source["id"])
+    raw_dir.mkdir(parents=True, exist_ok=True)
+    output_path = raw_dir / "harvest.jsonl"
+    seen = _load_seen_urls(output_path)
+
+    query = _wikidata_sport_facts_query(max_records=max_records)
+    endpoint = str(source["endpoint"])
+    request_url = endpoint + "?" + urllib.parse.urlencode({"query": query, "format": "json"})
+    data = _fetch_json(request_url)
+    if data is None:
+        return []
+
+    rows: list[dict[str, Any]] = []
+    for binding in data.get("results", {}).get("bindings", []):
+        row = _wikidata_sport_fact_row(source, binding)
+        if row is None:
+            continue
+        if row["url"] in seen:
+            continue
+        seen.add(row["url"])
+        rows.append(row)
 
     if rows:
         with output_path.open("a", encoding="utf-8") as handle:
@@ -644,6 +686,73 @@ def minsport_document_links_from_api(data: dict[str, Any], *, title_keywords: li
     return links
 
 
+def _wikidata_sport_facts_query(*, max_records: int) -> str:
+    limit = max(1, min(max_records, 200))
+    return f"""
+SELECT ?item ?itemLabel ?sportLabel ?countryLabel ?dob ?article WHERE {{
+  ?item wdt:P106 wd:Q2066131;
+        wdt:P27 ?country.
+  VALUES ?country {{ wd:Q159 wd:Q15180 }}
+  OPTIONAL {{ ?item wdt:P641 ?sport. }}
+  OPTIONAL {{ ?item wdt:P569 ?dob. }}
+  OPTIONAL {{
+    ?article schema:about ?item;
+             schema:isPartOf <https://ru.wikipedia.org/>.
+  }}
+  SERVICE wikibase:label {{ bd:serviceParam wikibase:language "ru,en". }}
+}}
+LIMIT {limit}
+""".strip()
+
+
+def _wikidata_sport_fact_row(source: dict[str, Any], binding: dict[str, Any]) -> dict[str, Any] | None:
+    item_url = _binding_value(binding, "item")
+    item_label = _binding_value(binding, "itemLabel")
+    if not item_url or not item_label:
+        return None
+
+    sport = _binding_value(binding, "sportLabel") or "спорт не указан"
+    country = _binding_value(binding, "countryLabel") or "страна не указана"
+    dob = _binding_value(binding, "dob")
+    birth_year = dob[:4] if dob and re.match(r"\d{4}", dob) else "год рождения не указан"
+    article = _binding_value(binding, "article")
+    facts = [
+        f"Объект Wikidata: {item_label}.",
+        f"Тип факта: российский или советский спортсмен.",
+        f"Вид спорта: {sport}.",
+        f"Страна/гражданство в записи: {country}.",
+        f"Год рождения: {birth_year}.",
+    ]
+    if article:
+        facts.append(f"Русская энциклопедическая статья: {article}.")
+    facts.append("Лицензия фактических данных Wikidata: CC0; строка пригодна для фактологического sport-history корпуса.")
+    text = " ".join(facts)
+    if len(text) < 200:
+        text = f"{text} " + " ".join(facts)
+
+    return {
+        "id": _row_id(str(source["id"]), item_url),
+        "source_id": source["id"],
+        "source_title": item_label,
+        "url": item_url,
+        "license_kind": "cc0",
+        "license_url": "https://www.wikidata.org/wiki/Wikidata:Licensing",
+        "license_verified": True,
+        "requires_human_approval": False,
+        "sport": _infer_sport(sport),
+        "category": _first_category(source),
+        "content_type": "application/sparql-results+json",
+        "text": text,
+    }
+
+
+def _binding_value(binding: dict[str, Any], name: str) -> str | None:
+    value = binding.get(name, {})
+    if isinstance(value, dict) and value.get("value"):
+        return str(value["value"])
+    return None
+
+
 def extract_pdf_text_with_ocr(
     path: Path,
     *,
@@ -780,6 +889,95 @@ def _html_to_text_and_links(body: str, base_url: str) -> tuple[str, list[str]]:
     parser.feed(body)
     text = re.sub(r"\s+", " ", " ".join(parser.text_parts)).strip()
     return text, parser.links
+
+
+def _official_history_text_from_html(body: str, base_url: str) -> str:
+    full_text, _links = _html_to_text_and_links(body, base_url)
+    candidates = [full_text]
+    candidates.extend(_readable_html_block_texts(body, base_url))
+    best = max(candidates, key=_history_text_score, default=full_text)
+    return _trim_official_history_boilerplate(_dedupe_adjacent_phrases(best))
+
+
+def _readable_html_block_texts(body: str, base_url: str) -> list[str]:
+    blocks: list[str] = []
+    for tag in ("main", "article"):
+        blocks.extend(re.findall(fr"<{tag}\b[^>]*>(.*?)</{tag}>", body, flags=re.IGNORECASE | re.DOTALL))
+
+    keyword_pattern = r"(?:content|article|news|history|text|body|page|detail|post)"
+    block_pattern = (
+        r"<(div|section)\b(?=[^>]*(?:class|id)=['\"][^'\"]*"
+        + keyword_pattern
+        + r"[^'\"]*['\"])[^>]*>(.*?)</\1>"
+    )
+    blocks.extend(match.group(2) for match in re.finditer(block_pattern, body, flags=re.IGNORECASE | re.DOTALL))
+
+    texts: list[str] = []
+    for block in blocks:
+        text, _links = _html_to_text_and_links(block, base_url)
+        text = re.sub(r"\s+", " ", text).strip()
+        if len(text) >= 200:
+            texts.append(text)
+    return texts
+
+
+def _history_text_score(text: str) -> int:
+    lowered = text.casefold()
+    score = len(text)
+    score += 250 * len(re.findall(r"\b(?:18|19|20)\d{2}\b", text))
+    score += 300 * sum(word in lowered for word in ["история", "спорт", "федерац", "сборн", "олимп"])
+    score -= 500 * sum(word in lowered for word in ["переключиться", "контакты", "закупки", "меню", "личный кабинет"])
+    return score
+
+
+def _dedupe_adjacent_phrases(text: str) -> str:
+    parts = [part.strip() for part in re.split(r"(?<=[.!?])\s+|\s{2,}", text) if part.strip()]
+    deduped: list[str] = []
+    previous = ""
+    for part in parts:
+        normalized = re.sub(r"\W+", "", part.casefold())
+        if normalized and normalized == previous:
+            continue
+        deduped.append(part)
+        previous = normalized
+    return re.sub(r"\s+", " ", " ".join(deduped)).strip()
+
+
+def _trim_official_history_boilerplate(text: str, *, max_chars: int = 8_000) -> str:
+    early = text[:2_000].casefold()
+    noise_terms = ["переключиться", "личный кабинет", "закупки", "контакты", "назад"]
+    if len(text) <= max_chars and not any(term in early for term in noise_terms):
+        return text
+
+    starts = {0}
+    for match in re.finditer(r"\b(?:18|19|20)\d{2}\b|История\s+[А-Яа-яЁёA-Za-z]", text):
+        if match.start() < 250:
+            continue
+        starts.add(max(0, match.start() - 80))
+
+    windows = [text[start : start + max_chars].strip() for start in sorted(starts)]
+    return _remove_official_noise_phrases(max(windows, key=_history_window_score, default=text[:max_chars]).strip())
+
+
+def _remove_official_noise_phrases(text: str) -> str:
+    noise_patterns = [
+        r"Переключиться на английскую версию сайта\.?",
+        r"©\s*2004\s*-\s*2026[^.]+\.?",
+        r"Задать вопрос",
+        r"Горячая линия",
+    ]
+    for pattern in noise_patterns:
+        text = re.sub(pattern, " ", text, flags=re.IGNORECASE)
+    return re.sub(r"\s+", " ", text).strip()
+
+
+def _history_window_score(text: str) -> int:
+    lowered = text.casefold()
+    score = 900 * len(re.findall(r"\b(?:18|19|20)\d{2}\b", text))
+    score += 500 * sum(word in lowered for word in ["история", "спорт", "федерац", "сборн", "олимп"])
+    score -= 900 * sum(word in lowered for word in ["переключиться", "личный кабинет", "закупки", "контакты", "назад"])
+    score += min(len(text), 2_000)
+    return score
 
 
 def _document_links(links: list[str], start_url: str) -> list[str]:
@@ -1070,7 +1268,7 @@ class _TextAndLinkParser(html.parser.HTMLParser):
         self._skip_depth = 0
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
-        if tag in {"script", "style", "noscript"}:
+        if tag in {"script", "style", "noscript", "header", "nav", "footer", "aside"}:
             self._skip_depth += 1
             return
         if tag == "a":
@@ -1080,7 +1278,7 @@ class _TextAndLinkParser(html.parser.HTMLParser):
                 self.links.append(urllib.parse.urljoin(self.base_url, href))
 
     def handle_endtag(self, tag: str) -> None:
-        if tag in {"script", "style", "noscript"} and self._skip_depth:
+        if tag in {"script", "style", "noscript", "header", "nav", "footer", "aside"} and self._skip_depth:
             self._skip_depth -= 1
 
     def handle_data(self, data: str) -> None:

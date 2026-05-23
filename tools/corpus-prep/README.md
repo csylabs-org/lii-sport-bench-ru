@@ -7,7 +7,7 @@ Offline-safe corpus pipeline scaffold for the Selectel AR45G validation batch.
 - Recommended provider: `agy` (Antigravity CLI, Gemini 3.5 Flash default routing).
 - Fallback provider: OpenRouter `google/gemini-3.5-flash`.
 - Runtime decision: collect/prep on the Mac first (`pdftotext` + Tesseract `rus+eng` OCR); reserve NVIDIA for Gemma 4 31B SFT training.
-- Current retained release: expanded RUSADA high-signal anti-doping + MinSport ЕКП/EVSK procedures + 21-document OCR federal standards checkpoint + CC BY Лесгафта methodology articles + CC BY CyberLeninka sport-history articles + human-approved official history pages + human-approved federation rules batches for hockey, volleyball, basketball, swimming, football, athletics, and gymnastics, `312/312` examples kept after cleaning.
+- Current retained release: expanded RUSADA high-signal anti-doping + MinSport ЕКП/EVSK procedures + 21-document OCR federal standards checkpoint + CC BY Лесгафта methodology articles + CC BY CyberLeninka sport-history articles + Wikidata CC0 sport facts + human-approved official history pages + human-approved federation rules batches for hockey, volleyball, basketball, swimming, football, athletics, and gymnastics, `360/360` examples kept after cleaning.
 - Corpus example counts are generated SFT Q&A rows. Source counts are separate raw pages/PDFs/article records under `corpus/raw/`.
 - Federation-rule rows are retained for the working/internal corpus only: `requires_human_approval=true`, `license_kind=human-approved-federation-public-doc`.
 - New federation source inventory has saved football, athletics, and gymnastics PDFs under `corpus/raw/<source-id>/documents/`; the first smoke rows are retained in the current release.
@@ -25,6 +25,7 @@ Offline-safe corpus pipeline scaffold for the Selectel AR45G validation batch.
   - `corpus/raw/fed-rules-gymnastics-approved/harvest.jsonl`
   - `corpus/raw/sport-history-ccby-cyberleninka/harvest.jsonl`
   - `corpus/raw/sport-history-official-approved/harvest.jsonl`
+  - `corpus/raw/sport-facts-wikidata-cc0/harvest.jsonl`
   - `corpus/synth/agy-rusada-high-signal-current.jsonl`
   - `corpus/synth/agy-evsk-ekp-current.jsonl`
   - `corpus/synth/agy-minsport-fed-standards-ocr-current.jsonl`
@@ -38,6 +39,7 @@ Offline-safe corpus pipeline scaffold for the Selectel AR45G validation batch.
   - `corpus/synth/agy-fed-rules-gymnastics-approved-current.jsonl`
   - `corpus/synth/agy-sport-history-ccby-cyberleninka-current.jsonl`
   - `corpus/synth/agy-sport-history-official-approved-current.jsonl`
+  - `corpus/synth/agy-sport-facts-wikidata-cc0-current.jsonl`
   - `corpus/lii-sport-sft-v0.1-current-agy-clean/`
 
 ## Scale-Up Workflow
@@ -66,6 +68,7 @@ Approximate production targets after chunking:
 | Лесгафта/RCSI CC BY articles | 36 | 100+ | Needs more CC BY article inventory beyond current issue |
 | CyberLeninka CC BY sport-history PDFs | 72 | 300-600 | First 24 full-text PDFs retained; expand article inventory |
 | Official/internal history pages | 15 | 500-1000 | First 5 pages retained behind `--include-human-approval`; needs cleaner page extraction |
+| Wikidata CC0 sport facts | 48 | 300-600 | First 16 Russian/Soviet athlete facts retained; query should be diversified by sport/event |
 
 Current immediate task: switch from whole-document smoke synthesis to section-chunked generation for the saved federation PDFs. Wrestling remains pending because the official documents page currently exposes a templated PDF URL with an unresolved `{item_id}` placeholder; resolve the live API/JS document id before harvesting it.
 
@@ -78,12 +81,12 @@ Priority new lanes:
 | Lane | Source id | License posture | First target |
 |---|---|---|---:|
 | CC BY sport-history papers | `sport-history-ccby-cyberleninka` | Public-safe if each article exposes CC BY | 300-600 rows; first 72 retained |
-| CC0 structured sport facts | `sport-facts-wikidata-cc0` | Public-safe | 300-600 rows |
+| CC0 structured sport facts | `sport-facts-wikidata-cc0` | Public-safe | 300-600 rows; first 48 retained |
 | Official federation/OKR history pages | `sport-history-official-approved` | Human-approved/internal | 500-1000 rows; first 15 retained |
 | Winter-sport rules/methodology | `winter-sports-approved` + CC BY filters | Mixed; keep separated | 500-1000 rows |
 | Section-chunked saved PDFs | existing federation/MinSport sources | Mixed; keep separated | 1500-3000 rows |
 
-Do not start SFT from the current `312/312` smoke release. The next gate is a `5k-10k` clean high-signal checkpoint; the serious public Preview target remains `30k-60k` examples.
+Do not start SFT from the current `360/360` smoke release. The next gate is a `5k-10k` clean high-signal checkpoint; the serious public Preview target remains `30k-60k` examples.
 
 ## Commands
 

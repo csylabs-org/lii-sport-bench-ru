@@ -131,7 +131,7 @@ Current status:
 - Corpus collection/prep runs Mac-first: local `pdftotext` + Tesseract `rus+eng` OCR on Apple Silicon, with NVIDIA reserved for later SFT training.
 - Default generation lane: Antigravity CLI `agy` using Gemini 3.5 Flash routing.
 - Fallback/audit lane: OpenRouter `google/gemini-3.5-flash`.
-- Current retained corpus: expanded RUSADA high-signal anti-doping + MinSport ЕКП/EVSK procedures + 21-document OCR federal standards checkpoint + CC BY Лесгафта methodology articles + CC BY CyberLeninka sport-history articles + human-approved official history pages + human-approved federation rules batches for hockey, volleyball, basketball, swimming, football, athletics, and gymnastics, `312/312` examples kept after cleaning.
+- Current retained corpus: expanded RUSADA high-signal anti-doping + MinSport ЕКП/EVSK procedures + 21-document OCR federal standards checkpoint + CC BY Лесгафта methodology articles + CC BY CyberLeninka sport-history articles + Wikidata CC0 sport facts + human-approved official history pages + human-approved federation rules batches for hockey, volleyball, basketball, swimming, football, athletics, and gymnastics, `360/360` examples kept after cleaning.
 - Count semantics: corpus counts are generated SFT Q&A examples, not source-document counts. Source documents/pages are tracked separately under ignored `corpus/raw/`.
 - The current federation rows are source-validation smoke rows. Production scale-up is documented in [`tools/corpus-prep/README.md`](./tools/corpus-prep/README.md): complete official PDF inventory first, then run section-chunked generation over clean extracted text.
 - Federation-rule examples are marked `requires_human_approval=true` and `license_kind=human-approved-federation-public-doc`; keep them separate from clean open-license publication lanes until downstream release policy is decided.
@@ -140,7 +140,7 @@ Current status:
 Next corpus milestones:
 
 1. Section-chunk the saved federation-rule PDFs beyond smoke volume; wrestling remains pending until the official PDF URL can be resolved from the dynamic documents page.
-2. Scale CC BY academic coverage beyond the current 12 Лесгафта/RCSI articles and 24 CyberLeninka sport-history articles; improve extraction for the first 5 official/internal history pages before scaling that lane.
+2. Scale CC BY/CC0 coverage beyond the current 12 Лесгафта/RCSI articles, 24 CyberLeninka sport-history articles, and 16 Wikidata fact records; keep official/internal history separate until release policy is clear.
 3. Keep `teoriya.ru` blocked unless explicit reuse permission is obtained; current site footer says copying materials is prohibited.
 
 ## License

@@ -12,6 +12,7 @@ from corpus_prep.harvest import (
     harvest_official_history_static,
     harvest_pdf_documents,
     harvest_rcsi_journal,
+    harvest_wikidata_sport_facts,
     plan_harvest,
     seed_demo_raw_batch,
 )
@@ -29,6 +30,7 @@ def main() -> None:
     parser.add_argument("--max-pages", type=int, default=10)
     parser.add_argument("--delay-seconds", type=float, default=0.5)
     parser.add_argument("--ignore-robots", action="store_true")
+    parser.add_argument("--refresh", action="store_true", help="overwrite existing raw harvest rows for refresh-capable harvesters")
     args = parser.parse_args()
 
     if args.seed_demo:
@@ -100,6 +102,15 @@ def main() -> None:
                     args.repo_root,
                     max_pages=args.max_pages,
                     delay_seconds=args.delay_seconds,
+                    refresh=args.refresh,
+                )
+                results.append({"source_id": source["id"], "status": "ok", "rows": len(rows)})
+                continue
+            if source["harvester"] == "wikidata_sparql":
+                rows = harvest_wikidata_sport_facts(
+                    source,
+                    args.repo_root,
+                    max_records=args.max_pages,
                 )
                 results.append({"source_id": source["id"], "status": "ok", "rows": len(rows)})
                 continue

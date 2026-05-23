@@ -31,7 +31,7 @@ Highest-leverage weak buckets from the 200-question pilot:
 | Lane | Source id | License posture | First target | Why |
 |---|---|---|---|---|
 | CC BY sport history papers | `sport-history-ccby-cyberleninka` | public-safe if page exposes CC BY | 300-600 rows | Expanded smoke batch retained: 24 PDFs -> 72 rows |
-| CC0 sport facts | `sport-facts-wikidata-cc0` | public-safe | 300-600 rows | Names, dates, medals, event facts |
+| CC0 sport facts | `sport-facts-wikidata-cc0` | public-safe | 300-600 rows | First smoke batch retained: 16 records -> 48 rows |
 | Official history pages | `sport-history-official-approved` | human-approved/internal | 500-1000 rows | Federation and OKR timelines, milestones, biographies |
 | Winter sport rules/methodology | `winter-sports-approved` + CC BY article filters | mixed; keep separated | 500-1000 rows | Biggest sport-level gap |
 | Section-chunked saved PDFs | existing federation/MinSport source ids | mixed; keep separated | 1500-3000 rows | Fastest way to scale from already saved docs |
@@ -87,7 +87,19 @@ Highest-leverage weak buckets from the 200-question pilot:
 - [x] Keep rows labeled internal/human-approved.
 - [x] Generate smoke rows only after extraction QA.
 - [x] Smoke-harvest 5 official/federation history pages -> 15 retained rows in combined clean release at `312/312`.
-- [ ] Improve main-content extraction before production scaling; current smoke rows include page navigation chrome.
+- [x] Improve main-content extraction before production scaling; official smoke rows now prefer `main`/`article`/content blocks and trim common navigation chrome.
+
+## Task 4.5: Add Wikidata CC0 Fact Lane
+
+**Files:**
+- Modify: `tools/corpus-prep/corpus_prep/harvest.py`
+- Modify: `tools/corpus-prep/harvest.py`
+- Modify: `tools/corpus-prep/tests/test_pipeline.py`
+
+- [x] Implement `wikidata_sparql` dispatch for `sport-facts-wikidata-cc0`.
+- [x] Keep rows labeled `license_kind=cc0`, `license_verified=true`, `requires_human_approval=false`.
+- [x] Smoke-harvest 16 Russian/Soviet athlete records -> 48 retained rows in combined clean release at `360/360`.
+- [ ] Diversify SPARQL queries by sport, event, medal, and competition to avoid over-weighting famous athlete biography facts.
 
 ## Task 5: Production Scale Decision
 
