@@ -123,6 +123,17 @@
   - cleaned extraction-noise glyphs from generated source excerpts before rebuilding
   - rebuilt current retained release at `936/936` with no PII, duplicate, license, or benchmark-leakage drops
   - coverage report still flags `below_sft_gate_5k`, `history_below_20pct`, `methodology_below_25pct`, and `winter_sports_missing`
+- Added human-approved winter-sport source lane:
+  - source id: `winter-sports-approved`
+  - registered stable PDF endpoints for biathlon, cross-country skiing, alpine skiing, figure skating, and snowboard
+  - harvested and saved `6` winter PDFs under ignored `corpus/raw/winter-sports-approved/documents/`
+  - fixed sport inference so `горнолыжный спорт` maps to `alpine-skiing` before the broader skiing marker
+  - generated `18` grounded smoke rows through `agy`
+  - rebuilt current retained release at `954/954` with no PII, duplicate, license, or benchmark-leakage drops
+  - coverage report no longer flags `winter_sports_missing`; remaining flags are `below_sft_gate_5k`, `history_below_20pct`, and `methodology_below_25pct`
+- Tightened the PII gate for standalone INN-like identifiers:
+  - ВРВС sport-discipline codes such as `0420013611Я` are no longer dropped as false-positive INN-like PII
+  - added regression coverage for retained sport discipline codes
 - Documented scale-up boundary:
   - current federation rows are validation-scale rows, not final training volume
   - production corpus generation should widen section/page chunked synthesis over clean extracted text and keep human-approved/internal rows separate from public-release lanes
@@ -176,7 +187,7 @@
 
 ### Next steps
 
-1. Add winter-sport rules/methodology sources; current coverage report still flags `winter_sports_missing`.
+1. Section-chunk the retained winter-sport PDFs toward `500-1000` internal rows.
 2. Scale Лесгафта/RCSI and CyberLeninka CC BY coverage beyond the current smoke batches.
 3. Keep `teoriya.ru` blocked unless explicit reuse permission is obtained.
 

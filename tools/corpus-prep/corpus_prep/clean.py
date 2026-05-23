@@ -10,7 +10,7 @@ PII_PATTERNS = [
     re.compile(r"(?<!\d)(?:\+7|8)[\s\-()]*\d{3}[\s\-()]*\d{3}[\s\-()]*\d{2}[\s\-()]*\d{2}(?!\d)"),
     re.compile(r"[\w.+-]+@[\w-]+\.[\w.-]+"),
     re.compile(r"\b\d{3}-\d{3}-\d{3}\s?\d{2}\b"),  # SNILS
-    re.compile(r"\b\d{10}|\d{12}\b"),  # INN-like
+    re.compile(r"\b(?:\d{10}|\d{12})\b"),  # INN-like
     re.compile(r"\b\d{4}\s?\d{6}\b"),  # RU passport-like
 ]
 

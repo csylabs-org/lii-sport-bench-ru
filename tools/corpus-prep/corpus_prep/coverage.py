@@ -111,7 +111,7 @@ def _undercovered_flags(examples: list[dict[str, Any]]) -> list[str]:
         flags.append("methodology_below_25pct")
     if by_sport["general"] / total > 0.50:
         flags.append("general_sport_above_50pct")
-    for sport in ["biathlon", "skiing", "skating", "winter-sports"]:
+    for sport in ["biathlon", "skiing", "alpine-skiing", "snowboard", "figure-skating", "speed-skating", "skating", "winter-sports"]:
         if by_sport[sport] > 0:
             break
     else:

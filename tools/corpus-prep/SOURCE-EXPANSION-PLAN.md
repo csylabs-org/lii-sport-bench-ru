@@ -33,7 +33,7 @@ Highest-leverage weak buckets from the 200-question pilot:
 | CC BY sport history papers | `sport-history-ccby-cyberleninka` | public-safe if page exposes CC BY | 300-600 rows | Expanded smoke batch retained: 24 PDFs -> 72 rows |
 | CC0 sport facts | `sport-facts-wikidata-cc0` | public-safe | 300-600 rows | First smoke batch retained: 16 records -> 48 rows |
 | Official history pages | `sport-history-official-approved` | human-approved/internal | 500-1000 rows | Federation and OKR timelines, milestones, biographies |
-| Winter sport rules/methodology | `winter-sports-approved` + CC BY article filters | mixed; keep separated | 500-1000 rows | Biggest sport-level gap |
+| Winter sport rules/methodology | `winter-sports-approved` + CC BY article filters | mixed; keep separated | 500-1000 rows | First smoke retained: 6 PDFs -> 18 rows; biggest sport-level gap |
 | Section-chunked saved PDFs | existing federation/MinSport source ids | mixed; keep separated | 1500-3000 rows | Fastest way to scale from already saved docs |
 
 ## Task 1: Add Registry Entries
@@ -101,6 +101,22 @@ Highest-leverage weak buckets from the 200-question pilot:
 - [x] Smoke-harvest 16 Russian/Soviet athlete records -> 48 retained rows in combined clean release at `360/360`.
 - [ ] Diversify SPARQL queries by sport, event, medal, and competition to avoid over-weighting famous athlete biography facts.
 
+## Task 4.6: Add Winter Sport Rules Lane
+
+**Files:**
+- Modify: `tools/corpus-prep/sources.yaml`
+- Modify: `tools/corpus-prep/corpus_prep/harvest.py`
+- Modify: `tools/corpus-prep/corpus_prep/coverage.py`
+- Modify: `tools/corpus-prep/tests/test_pipeline.py`
+
+- [x] Add `winter-sports-approved` with stable direct PDF endpoints for biathlon, cross-country skiing, alpine skiing, figure skating, and snowboard.
+- [x] Keep rows labeled `license_kind=human-approved-federation-public-doc`, `requires_human_approval=true`.
+- [x] Extend sport inference for winter sports and ensure `горнолыжный спорт` maps to `alpine-skiing`.
+- [x] Harvest 6 winter PDFs into ignored `corpus/raw/winter-sports-approved/documents/`.
+- [x] Generate smoke rows through `agy`: 6 PDFs -> 18 retained rows.
+- [x] Rebuild combined clean release at `954/954`; coverage no longer reports `winter_sports_missing`.
+- [ ] Section-chunk the saved winter PDFs toward 500-1000 rows before SFT.
+
 ## Task 5: Production Scale Decision
 
 **Gate:** Do not train until at least `5k-10k` clean high-signal rows exist and category/sport coverage is visibly closer to the bench distribution.
@@ -108,5 +124,5 @@ Highest-leverage weak buckets from the 200-question pilot:
 - [x] Run first bounded section-chunk scale pass over saved federation/MinSport PDFs: `64` chunks -> `192` new `agy` rows -> combined clean release at `552/552`.
 - [x] Add `coverage_report.py` and produce a source/corpus coverage report by `source_id`, `sport`, `category`, `audience proxy`, and license lane.
 - [x] Run second balanced section-chunk scale pass over saved federation/MinSport PDFs: `128` chunks -> `384` new `agy` rows -> combined clean release at `936/936`.
-- [x] Confirm current corpus is still below SFT gate: `936` rows total, with history/СШОР/ВУЗ/winter sports still under-covered.
+- [x] Confirm current corpus is still below SFT gate: `954` rows total, with history/СШОР/ВУЗ/methodology still under-covered; winter sports now have smoke coverage but need scale.
 - [ ] If `5k-10k` rows pass gates, freeze a first training snapshot and run a small LoRA/DoRA pilot.

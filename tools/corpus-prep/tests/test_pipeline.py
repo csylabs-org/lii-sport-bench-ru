@@ -113,10 +113,15 @@ class CorpusPrepPipelineTests(unittest.TestCase):
         from corpus_prep.registry import load_sources
 
         sources = load_sources(Path("sources.yaml"))
-        fed_rules = {source["id"]: source for source in sources}["fed-rules"]
+        by_id = {source["id"]: source for source in sources}
+        fed_rules = by_id["fed-rules"]
+        winter = by_id["winter-sports-approved"]
 
         self.assertTrue(fed_rules["requires_human_approval"])
         self.assertEqual(fed_rules["license_kind"], "license-check-required")
+        self.assertTrue(winter["requires_human_approval"])
+        self.assertTrue(winter["direct_document"])
+        self.assertEqual(winter["license_kind"], "human-approved-federation-public-doc")
 
     def test_coverage_report_tracks_license_and_undercoverage(self):
         from corpus_prep.coverage import build_coverage_report
@@ -145,6 +150,19 @@ class CorpusPrepPipelineTests(unittest.TestCase):
         self.assertEqual(report["by_license_lane"]["open-license"], 1)
         self.assertIn("below_sft_gate_5k", report["undercovered_flags"])
         self.assertIn("winter_sports_missing", report["undercovered_flags"])
+
+        winter_report = build_coverage_report(
+            [
+                {
+                    "source_id": "winter-sports-approved",
+                    "sport": "biathlon",
+                    "category": "rules",
+                    "license_kind": "human-approved-federation-public-doc",
+                    "requires_human_approval": True,
+                }
+            ]
+        )
+        self.assertNotIn("winter_sports_missing", winter_report["undercovered_flags"])
 
     def test_clean_pipeline_drops_pii_and_bench_leakage(self):
         from corpus_prep.clean import clean_examples
@@ -196,6 +214,26 @@ class CorpusPrepPipelineTests(unittest.TestCase):
         self.assertEqual([example["id"] for example in cleaned], ["ok-1"])
         self.assertEqual(report["dropped"]["pii"], 1)
         self.assertEqual(report["dropped"]["bench_leakage"], 1)
+
+    def test_clean_pipeline_keeps_sport_discipline_codes(self):
+        from corpus_prep.clean import clean_examples
+
+        examples = [
+            {
+                "id": "sport-code",
+                "license_kind": "human-approved-federation-public-doc",
+                "license_verified": True,
+                "messages": [
+                    {"role": "user", "content": "Какой номер-код ВРВС указан для дисциплины?"},
+                    {"role": "assistant", "content": "Для дисциплины указан номер-код ВРВС 0420013611Я."},
+                ],
+            }
+        ]
+
+        cleaned, report = clean_examples(examples, [], min_chars=10)
+
+        self.assertEqual([example["id"] for example in cleaned], ["sport-code"])
+        self.assertEqual(report["dropped"], {})
 
     def test_make_splits_writes_manifest_hashes_without_overlap(self):
         from corpus_prep.splits import make_splits
@@ -674,6 +712,40 @@ class CorpusPrepPipelineTests(unittest.TestCase):
             self.assertTrue(row["requires_human_approval"])
             self.assertEqual(row["sport"], "hockey")
             self.assertEqual(row["source_title"], "Правила вида спорта хоккей")
+
+    def test_federation_rules_harvest_infers_winter_sports(self):
+        from corpus_prep.harvest import _infer_sport, harvest_federation_rules
+
+        self.assertEqual(_infer_sport("Правила вида спорта «горнолыжный спорт»"), "alpine-skiing")
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            web = root / "web"
+            web.mkdir()
+            pdf_path = web / "biathlon.pdf"
+            pdf_path.write_bytes(b"%PDF-test")
+            source = {
+                "id": "winter-sports-approved",
+                "endpoint": [pdf_path.as_uri()],
+                "direct_document": True,
+                "endpoint_titles": {pdf_path.as_uri(): "Правила вида спорта «биатлон»"},
+                "harvester": "federation_rules",
+                "license_kind": "human-approved-federation-public-doc",
+                "license_verified": True,
+                "requires_human_approval": True,
+                "bench_categories": ["rules", "methodology"],
+            }
+
+            rows = harvest_federation_rules(
+                source,
+                root,
+                max_documents=1,
+                delay_seconds=0,
+                extract_pdf_text=lambda _path: "Правила вида спорта биатлон описывают возрастные группы и порядок стрельбы. " * 4,
+            )
+
+            self.assertEqual(rows[0]["sport"], "biathlon")
+            self.assertEqual(rows[0]["category"], "rules")
 
     def test_official_history_static_harvest_keeps_internal_metadata(self):
         from corpus_prep.harvest import harvest_official_history_static
