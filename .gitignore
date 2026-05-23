@@ -5,3 +5,6 @@ node_modules/
 .DS_Store
 bun.lockb
 .bun/
+corpus/
+!tools/corpus-prep/
+__pycache__/
