@@ -91,7 +91,7 @@ Do not start SFT from the current `360/360` smoke release. The next gate is a `5
 ## Commands
 
 ```bash
-cd /Users/daniely/Projects/lii-sport-bench-ru
+cd /path/to/lii-sport-bench-ru
 
 # Inspect source plan without scraping or API calls.
 python3 -B tools/corpus-prep/harvest.py --repo-root "$PWD"
@@ -349,11 +349,12 @@ python3 -B tools/corpus-prep/harvest.py \
   --delay-seconds 0.3
 ```
 
-Known local secret locations:
+Secret lookup:
 
-- Canonical local env: `/Users/daniely/csylabs_vault/.env.local`
-- Gemini fallback: `/Users/daniely/csylabs_vault/.claude/settings.json`
-- OpenRouter fallback: `/Users/daniely/csylabs_vault/20-ventures/llm-integrator/.env.local`
+- exported `GEMINI_API_KEY` / `OPENROUTER_API_KEY`
+- repo-local ignored `.env.local`
+- optional vault root via `CSYLABS_VAULT_ROOT`
+- optional explicit path lists via `CORPUS_DOTENV_PATHS` / `CORPUS_CLAUDE_SETTINGS_PATHS`
 
 ## Model Defaults
 

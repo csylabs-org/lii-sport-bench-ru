@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 
 
@@ -8,15 +9,18 @@ SECRET_KEYS = {"GEMINI_API_KEY", "OPENROUTER_API_KEY"}
 
 
 def default_secret_paths() -> tuple[list[Path], list[Path]]:
-    return (
-        [
-            Path("/Users/daniely/csylabs_vault/.env.local"),
-            Path("/Users/daniely/csylabs_vault/20-ventures/llm-integrator/.env.local"),
-        ],
-        [
-            Path("/Users/daniely/csylabs_vault/.claude/settings.json"),
-        ],
-    )
+    dotenv_paths = [Path.cwd() / ".env.local"]
+    claude_settings_paths: list[Path] = []
+
+    vault_root = os.environ.get("CSYLABS_VAULT_ROOT")
+    if vault_root:
+        root = Path(vault_root).expanduser()
+        dotenv_paths.extend([root / ".env.local", root / "20-ventures" / "llm-integrator" / ".env.local"])
+        claude_settings_paths.append(root / ".claude" / "settings.json")
+
+    dotenv_paths.extend(_paths_from_env("CORPUS_DOTENV_PATHS"))
+    claude_settings_paths.extend(_paths_from_env("CORPUS_CLAUDE_SETTINGS_PATHS"))
+    return dotenv_paths, claude_settings_paths
 
 
 def load_default_secret_env() -> dict[str, str]:
@@ -25,7 +29,7 @@ def load_default_secret_env() -> dict[str, str]:
 
 
 def load_secret_env(dotenv_paths: list[Path], claude_settings_paths: list[Path]) -> dict[str, str]:
-    values: dict[str, str] = {}
+    values: dict[str, str] = {key: os.environ[key] for key in SECRET_KEYS if os.environ.get(key)}
     for path in dotenv_paths:
         if path.exists():
             values.update(_read_dotenv(path))
@@ -37,6 +41,11 @@ def load_secret_env(dotenv_paths: list[Path], claude_settings_paths: list[Path])
 
 def redact_env(values: dict[str, str]) -> dict[str, str]:
     return {key: "SET" if value else "MISSING" for key, value in values.items()}
+
+
+def _paths_from_env(name: str) -> list[Path]:
+    value = os.environ.get(name, "")
+    return [Path(path).expanduser() for path in value.split(os.pathsep) if path.strip()]
 
 
 def _read_dotenv(path: Path) -> dict[str, str]:

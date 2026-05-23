@@ -12,9 +12,10 @@
   - grounded Q&A synthesis
   - benchmark-leakage, PII, duplicate, license, and split gates
   - release artifacts (`train.jsonl`, `val.jsonl`, `test.jsonl`, manifests, hashes, license matrix, stats)
-- Centralized secret lookup through the local vault env:
-  - `/Users/daniely/csylabs_vault/.env.local`
-  - Gemini/OpenRouter legacy fallback paths remain supported
+- Centralized secret lookup without committed secret values:
+  - exported env vars and repo-local ignored `.env.local`
+  - optional vault root via `CSYLABS_VAULT_ROOT`
+  - optional explicit path lists for Gemini/OpenRouter fallback env files
 - Added Antigravity CLI provider:
   - default provider: `agy`
   - model label: `antigravity-default-gemini-3.5-flash`

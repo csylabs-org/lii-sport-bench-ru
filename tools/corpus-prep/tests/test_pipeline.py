@@ -1,4 +1,5 @@
 import json
+import os
 import tempfile
 import unittest
 from unittest.mock import patch
@@ -204,13 +205,23 @@ class CorpusPrepPipelineTests(unittest.TestCase):
             self.assertEqual(loaded["OPENROUTER_API_KEY"], "or-test")
             self.assertEqual(loaded["GEMINI_API_KEY"], "gem-test")
 
-    def test_default_secret_paths_prefer_vault_root_env(self):
+    def test_default_secret_paths_use_public_safe_env_configuration(self):
         from corpus_prep.secrets import default_secret_paths
 
-        dotenv_paths, settings_paths = default_secret_paths()
+        with unittest.mock.patch.dict(
+            os.environ,
+            {
+                "CSYLABS_VAULT_ROOT": "/tmp/csylabs_vault",
+                "CORPUS_DOTENV_PATHS": "/tmp/extra.env",
+                "CORPUS_CLAUDE_SETTINGS_PATHS": "/tmp/settings.json",
+            },
+        ):
+            dotenv_paths, settings_paths = default_secret_paths()
 
-        self.assertEqual(dotenv_paths[0], Path("/Users/daniely/csylabs_vault/.env.local"))
-        self.assertIn(Path("/Users/daniely/csylabs_vault/.claude/settings.json"), settings_paths)
+        self.assertIn(Path("/tmp/csylabs_vault/.env.local"), dotenv_paths)
+        self.assertIn(Path("/tmp/csylabs_vault/.claude/settings.json"), settings_paths)
+        self.assertIn(Path("/tmp/extra.env"), dotenv_paths)
+        self.assertIn(Path("/tmp/settings.json"), settings_paths)
 
     def test_default_generation_models_use_latest_available_gemini(self):
         from corpus_prep.models import DEFAULT_MODELS
