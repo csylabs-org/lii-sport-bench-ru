@@ -7,6 +7,52 @@ from pathlib import Path
 
 
 class CorpusPrepPipelineTests(unittest.TestCase):
+    def test_chunk_raw_examples_balances_by_source_and_spreads_long_text(self):
+        from corpus_prep.chunk import chunk_raw_examples
+
+        rows = [
+            {
+                "id": "football-doc",
+                "source_id": "football",
+                "url": "https://example.test/football.pdf",
+                "license_kind": "public-domain",
+                "license_verified": True,
+                "requires_human_approval": False,
+                "sport": "football",
+                "category": "rules",
+                "text": " ".join(f"football-{index}" for index in range(1200)),
+            },
+            {
+                "id": "volleyball-doc",
+                "source_id": "volleyball",
+                "url": "https://example.test/volleyball.pdf",
+                "license_kind": "public-domain",
+                "license_verified": True,
+                "requires_human_approval": False,
+                "sport": "volleyball",
+                "category": "rules",
+                "text": " ".join(f"volleyball-{index}" for index in range(1200)),
+            },
+        ]
+
+        chunks = chunk_raw_examples(rows, chunks_per_source=2, chunk_chars=1200, min_chars=200)
+
+        self.assertEqual(len(chunks), 4)
+        self.assertEqual([chunk["source_id"] for chunk in chunks].count("football"), 2)
+        self.assertEqual([chunk["source_id"] for chunk in chunks].count("volleyball"), 2)
+        self.assertTrue(all(chunk["chunk_strategy"] == "even-window-v1" for chunk in chunks))
+        self.assertIn("football-0", chunks[0]["text"])
+        self.assertIn("football-1199", chunks[1]["text"])
+
+        filtered = chunk_raw_examples(
+            rows,
+            chunks_per_source=2,
+            chunk_chars=1200,
+            min_chars=200,
+            source_ids={"volleyball"},
+        )
+        self.assertEqual({chunk["source_id"] for chunk in filtered}, {"volleyball"})
+
     def test_source_registry_marks_federation_rules_for_human_approval(self):
         from corpus_prep.registry import load_sources
 

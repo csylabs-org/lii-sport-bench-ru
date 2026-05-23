@@ -7,7 +7,7 @@ Offline-safe corpus pipeline scaffold for the Selectel AR45G validation batch.
 - Recommended provider: `agy` (Antigravity CLI, Gemini 3.5 Flash default routing).
 - Fallback provider: OpenRouter `google/gemini-3.5-flash`.
 - Runtime decision: collect/prep on the Mac first (`pdftotext` + Tesseract `rus+eng` OCR); reserve NVIDIA for Gemma 4 31B SFT training.
-- Current retained release: expanded RUSADA high-signal anti-doping + MinSport ЕКП/EVSK procedures + 21-document OCR federal standards checkpoint + CC BY Лесгафта methodology articles + CC BY CyberLeninka sport-history articles + Wikidata CC0 sport facts + human-approved official history pages + human-approved federation rules batches for hockey, volleyball, basketball, swimming, football, athletics, and gymnastics, `360/360` examples kept after cleaning.
+- Current retained release: expanded RUSADA high-signal anti-doping + MinSport ЕКП/EVSK procedures + 21-document OCR federal standards checkpoint + CC BY Лесгафта methodology articles + CC BY CyberLeninka sport-history articles + Wikidata CC0 sport facts + human-approved official history pages + human-approved federation rules batches for hockey, volleyball, basketball, swimming, football, athletics, and gymnastics, plus the first balanced section-chunk pass over saved federation/MinSport PDFs, `552/552` examples kept after cleaning.
 - Corpus example counts are generated SFT Q&A rows. Source counts are separate raw pages/PDFs/article records under `corpus/raw/`.
 - Federation-rule rows are retained for the working/internal corpus only: `requires_human_approval=true`, `license_kind=human-approved-federation-public-doc`.
 - New federation source inventory has saved football, athletics, and gymnastics PDFs under `corpus/raw/<source-id>/documents/`; the first smoke rows are retained in the current release.
@@ -37,6 +37,7 @@ Offline-safe corpus pipeline scaffold for the Selectel AR45G validation batch.
   - `corpus/synth/agy-fed-rules-football-approved-current.jsonl`
   - `corpus/synth/agy-fed-rules-athletics-approved-current.jsonl`
   - `corpus/synth/agy-fed-rules-gymnastics-approved-current.jsonl`
+  - `corpus/synth/agy-section-chunks-fed-minsport-current.jsonl`
   - `corpus/synth/agy-sport-history-ccby-cyberleninka-current.jsonl`
   - `corpus/synth/agy-sport-history-official-approved-current.jsonl`
   - `corpus/synth/agy-sport-facts-wikidata-cc0-current.jsonl`
@@ -44,7 +45,7 @@ Offline-safe corpus pipeline scaffold for the Selectel AR45G validation batch.
 
 ## Scale-Up Workflow
 
-The current federation-rule rows are smoke-test rows, not the final volume. The production sequence is:
+The current federation-rule rows have passed the first section-chunk validation pass, but they are still below final training volume. The production sequence is:
 
 1. Source inventory: find stable official pages/PDF URLs, add them to `sources.yaml`, and harvest the PDFs into `corpus/raw/<source-id>/documents/`.
 2. Extraction QA: spot-check `pdftotext`/OCR output before generation; reject HTML masquerading as PDF, broken links, mojibake-heavy text, and duplicates.
@@ -56,21 +57,21 @@ Approximate production targets after chunking:
 
 | Source family | Current retained rows | Production target | Status |
 |---|---:|---:|---|
-| FHR hockey rules/officiating PDFs | 12 | 150+ | Harvested smoke batch; ready for section chunking |
-| VFR volleyball 2025 rules PDF | 3 | 60-120 | Clean 2025 PDF retained; older mojibake PDF excluded from synth |
-| RFB basketball 2024 rules PDF | 3 | 80-150 | Clean direct PDF retained; interpretations URL currently 404 |
-| Swimming 2026 rules PDF | 3 | 50-100 | Clean direct PDF retained |
-| RFS football 2025 rules PDF | 3 | 100-180 | Raw PDF harvested; smoke batch retained; ready for section chunking |
-| RusAthletics 2023 rules PDF | 3 | 80-150 | Raw PDF harvested; smoke batch retained; ready for section chunking |
-| Sport Gymnastics 2022 rules PDF | 3 | 80-150 | Raw PDF harvested; smoke batch retained; ready for section chunking |
-| MinSport federal standards | 63 | 200+ | 21 PDFs retained; chunking can scale rows without more source discovery |
+| FHR hockey rules/officiating PDFs | 36 | 150+ | First 8 section chunks retained; continue section chunking |
+| VFR volleyball 2025 rules PDF | 27 | 60-120 | First 8 section chunks retained; older mojibake PDF excluded from synth |
+| RFB basketball 2024 rules PDF | 27 | 80-150 | First 8 section chunks retained; interpretations URL currently 404 |
+| Swimming 2026 rules PDF | 27 | 50-100 | First 8 section chunks retained |
+| RFS football 2025 rules PDF | 27 | 100-180 | First 8 section chunks retained; continue section chunking |
+| RusAthletics 2023 rules PDF | 27 | 80-150 | First 8 section chunks retained; continue section chunking |
+| Sport Gymnastics 2022 rules PDF | 27 | 80-150 | First 8 section chunks retained; continue section chunking |
+| MinSport federal standards | 87 | 200+ | First balanced section chunks retained; can scale rows without more source discovery |
 | RUSADA high-signal pages | 87 | 120-200 | Good URL-filtered source set; can expand cautiously |
 | Лесгафта/RCSI CC BY articles | 36 | 100+ | Needs more CC BY article inventory beyond current issue |
 | CyberLeninka CC BY sport-history PDFs | 72 | 300-600 | First 24 full-text PDFs retained; expand article inventory |
 | Official/internal history pages | 15 | 500-1000 | First 5 pages retained behind `--include-human-approval`; needs cleaner page extraction |
 | Wikidata CC0 sport facts | 48 | 300-600 | First 16 Russian/Soviet athlete facts retained; query should be diversified by sport/event |
 
-Current immediate task: switch from whole-document smoke synthesis to section-chunked generation for the saved federation PDFs. Wrestling remains pending because the official documents page currently exposes a templated PDF URL with an unresolved `{item_id}` placeholder; resolve the live API/JS document id before harvesting it.
+Current immediate task: widen the section-chunked generation pass from `8` chunks per saved source family toward the production targets, after spot-checking the retained `552/552` batch. Wrestling remains pending because the official documents page currently exposes a templated PDF URL with an unresolved `{item_id}` placeholder; resolve the live API/JS document id before harvesting it.
 
 ## Bench-Gap Source Expansion
 
@@ -86,7 +87,7 @@ Priority new lanes:
 | Winter-sport rules/methodology | `winter-sports-approved` + CC BY filters | Mixed; keep separated | 500-1000 rows |
 | Section-chunked saved PDFs | existing federation/MinSport sources | Mixed; keep separated | 1500-3000 rows |
 
-Do not start SFT from the current `360/360` smoke release. The next gate is a `5k-10k` clean high-signal checkpoint; the serious public Preview target remains `30k-60k` examples.
+Do not start SFT from the current `552/552` validation release. The next gate is a `5k-10k` clean high-signal checkpoint; the serious public Preview target remains `30k-60k` examples.
 
 ## Commands
 
@@ -104,6 +105,21 @@ python3 -B tools/corpus-prep/harvest.py --repo-root "$PWD" --seed-demo
 
 # Clean, leakage-check, split, and write release artifacts.
 PYTHONPATH=tools/corpus-prep python3 -B tools/corpus-prep/clean.py --repo-root "$PWD" --output-name lii-sport-sft-v0.1-demo
+
+# Build balanced section chunks from harvested long PDFs/pages.
+PYTHONPATH=tools/corpus-prep python3 -B tools/corpus-prep/chunk_raw.py \
+  --repo-root "$PWD" \
+  --input-root "$PWD/corpus/raw" \
+  --output "$PWD/corpus/raw/section-chunks-fed-minsport-current/harvest.jsonl" \
+  --source-id fed-rules-approved \
+  --source-id fed-rules-volleyball-approved \
+  --source-id fed-rules-basketball-approved \
+  --source-id fed-rules-swimming-approved \
+  --source-id fed-rules-football-approved \
+  --source-id fed-rules-athletics-approved \
+  --source-id fed-rules-gymnastics-approved \
+  --source-id minsport-fed-standards \
+  --chunks-per-source 8
 
 # Recommended cheap lane: generate grounded Q&A through Antigravity CLI.
 python3 -B tools/corpus-prep/qa_synthesize.py --repo-root "$PWD" --provider agy --max-examples 10 --questions-per-chunk 3

@@ -109,9 +109,15 @@
   - `360` kept after cleaning
   - split: `332 train / 16 val / 12 test`
   - source mix: `87` RUSADA, `9` EVSK/EKP, `63` MinSport federal standards, `36` Лесгафта, `72` CC BY CyberLeninka sport-history rows, `48` Wikidata CC0 sport-fact rows, `15` official/internal history rows, `12` FHR hockey rules, `3` VFR volleyball rules, `3` RFB basketball rules, `3` swimming rules, `3` RFS football rules, `3` RusAthletics rules, `3` sport gymnastics rules
+- Added reproducible section-chunk scale pass:
+  - new CLI: `tools/corpus-prep/chunk_raw.py`
+  - generated `64` balanced section chunks from saved federation/MinSport raw documents
+  - synthesized `192` additional grounded examples through `agy`
+  - rebuilt current retained release at `552/552` with no PII, duplicate, license, or benchmark-leakage drops
+  - rules coverage increased from `30` to `198` retained examples; sport-specific rows increased for hockey, volleyball, basketball, swimming, football, athletics, and gymnastics
 - Documented scale-up boundary:
-  - current federation rows are source-validation smoke rows
-  - production corpus generation should first complete official PDF inventory, then run section/page chunked synthesis over clean extracted text
+  - current federation rows are validation-scale rows, not final training volume
+  - production corpus generation should widen section/page chunked synthesis over clean extracted text and keep human-approved/internal rows separate from public-release lanes
   - added approximate production targets per source family in `tools/corpus-prep/README.md`
 - Expanded federation document inventory:
   - added human-approved/internal source ids for RFS football, RusAthletics athletics, and sport gymnastics rules PDFs
@@ -162,7 +168,7 @@
 
 ### Next steps
 
-1. Section-chunk the saved federation PDFs beyond smoke volume, keeping the human-approved/internal label.
+1. Widen section-chunked generation beyond the current `8` chunks/source validation batch, keeping the human-approved/internal label.
 2. Scale Лесгафта/RCSI article coverage beyond the 12-article CC BY smoke batch.
 3. Keep `teoriya.ru` blocked unless explicit reuse permission is obtained.
 
