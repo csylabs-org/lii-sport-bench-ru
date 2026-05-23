@@ -18,6 +18,8 @@ def main() -> None:
     parser.add_argument("--chunk-chars", type=int, default=5600)
     parser.add_argument("--min-chars", type=int, default=800)
     parser.add_argument("--source-id", action="append", help="Limit chunking to one source id; repeatable.")
+    parser.add_argument("--include-existing-chunks", action="store_true", help="Allow re-chunking rows that already have chunk_strategy metadata.")
+    parser.add_argument("--batch-id", help="Optional id segment added before section-NN to avoid collisions between scale batches.")
     args = parser.parse_args()
 
     input_root = args.input_root or args.repo_root / "corpus" / "raw"
@@ -29,6 +31,8 @@ def main() -> None:
         chunk_chars=args.chunk_chars,
         min_chars=args.min_chars,
         source_ids=set(args.source_id) if args.source_id else None,
+        include_existing_chunks=args.include_existing_chunks,
+        batch_id=args.batch_id,
     )
     print(
         json.dumps(

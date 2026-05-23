@@ -16,9 +16,13 @@ def chunk_raw_examples(
     chunk_chars: int = 5600,
     min_chars: int = 800,
     source_ids: set[str] | None = None,
+    include_existing_chunks: bool = False,
+    batch_id: str | None = None,
 ) -> list[dict[str, Any]]:
     grouped: dict[str, list[dict[str, Any]]] = {}
     for row in raw_examples:
+        if row.get("chunk_strategy") and not include_existing_chunks:
+            continue
         source_id = str(row.get("source_id", "unknown"))
         if source_ids is not None and source_id not in source_ids:
             continue
@@ -26,17 +30,18 @@ def chunk_raw_examples(
 
     chunks: list[dict[str, Any]] = []
     for source_id in sorted(grouped):
-        source_chunks: list[dict[str, Any]] = []
+        row_chunks: list[list[dict[str, Any]]] = []
         for row in grouped[source_id]:
-            source_chunks.extend(
-                _chunks_for_row(
-                    row,
-                    chunk_chars=chunk_chars,
-                    min_chars=min_chars,
-                    max_chunks=chunks_per_source,
-                )
+            chunks_for_row = _chunks_for_row(
+                row,
+                chunk_chars=chunk_chars,
+                min_chars=min_chars,
+                max_chunks=chunks_per_source,
+                batch_id=batch_id,
             )
-        chunks.extend(source_chunks[:chunks_per_source])
+            if chunks_for_row:
+                row_chunks.append(chunks_for_row)
+        chunks.extend(_round_robin(row_chunks, limit=chunks_per_source))
     return chunks
 
 
@@ -48,6 +53,8 @@ def write_chunked_jsonl(
     chunk_chars: int = 5600,
     min_chars: int = 800,
     source_ids: set[str] | None = None,
+    include_existing_chunks: bool = False,
+    batch_id: str | None = None,
 ) -> list[dict[str, Any]]:
     chunks = chunk_raw_examples(
         read_jsonl_tree(input_root),
@@ -55,6 +62,8 @@ def write_chunked_jsonl(
         chunk_chars=chunk_chars,
         min_chars=min_chars,
         source_ids=source_ids,
+        include_existing_chunks=include_existing_chunks,
+        batch_id=batch_id,
     )
     output.parent.mkdir(parents=True, exist_ok=True)
     with output.open("w", encoding="utf-8") as handle:
@@ -69,6 +78,7 @@ def _chunks_for_row(
     chunk_chars: int,
     min_chars: int,
     max_chunks: int,
+    batch_id: str | None,
 ) -> list[dict[str, Any]]:
     text = re.sub(r"\s+", " ", str(row.get("text", ""))).strip()
     if len(text) < min_chars:
@@ -83,14 +93,35 @@ def _chunks_for_row(
         if len(chunk_text) < min_chars:
             continue
         chunk = dict(row)
-        chunk["id"] = f"{row['id']}-section-{index:02d}"
+        id_parts = [str(row["id"])]
+        if batch_id:
+            id_parts.append(batch_id)
+        id_parts.append(f"section-{index:02d}")
+        chunk["id"] = "-".join(id_parts)
         chunk["text"] = chunk_text
         chunk["source_title"] = f"{row.get('source_title') or row.get('id')} [section {index}]"
         chunk["chunk_index"] = index
         chunk["chunk_chars"] = len(chunk_text)
-        chunk["chunk_strategy"] = "even-window-v1"
+        chunk["chunk_strategy"] = "doc-balanced-even-window-v2"
         chunks.append(chunk)
     return chunks
+
+
+def _round_robin(rows: list[list[dict[str, Any]]], *, limit: int) -> list[dict[str, Any]]:
+    selected: list[dict[str, Any]] = []
+    index = 0
+    while len(selected) < limit:
+        added = False
+        for row_chunks in rows:
+            if index < len(row_chunks):
+                selected.append(row_chunks[index])
+                added = True
+                if len(selected) >= limit:
+                    break
+        if not added:
+            break
+        index += 1
+    return selected
 
 
 def _even_starts(text_len: int, *, chunk_chars: int, count: int) -> list[int]:

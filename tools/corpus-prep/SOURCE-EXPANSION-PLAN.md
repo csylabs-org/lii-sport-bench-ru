@@ -106,6 +106,7 @@ Highest-leverage weak buckets from the 200-question pilot:
 **Gate:** Do not train until at least `5k-10k` clean high-signal rows exist and category/sport coverage is visibly closer to the bench distribution.
 
 - [x] Run first bounded section-chunk scale pass over saved federation/MinSport PDFs: `64` chunks -> `192` new `agy` rows -> combined clean release at `552/552`.
-- [ ] Produce a source/corpus coverage report by `source_id`, `sport`, `category`, `audience proxy`, and license lane.
-- [x] Confirm current corpus is still below SFT gate: `552` rows total, with history/СШОР/ВУЗ/winter sports still under-covered.
+- [x] Add `coverage_report.py` and produce a source/corpus coverage report by `source_id`, `sport`, `category`, `audience proxy`, and license lane.
+- [x] Run second balanced section-chunk scale pass over saved federation/MinSport PDFs: `128` chunks -> `384` new `agy` rows -> combined clean release at `936/936`.
+- [x] Confirm current corpus is still below SFT gate: `936` rows total, with history/СШОР/ВУЗ/winter sports still under-covered.
 - [ ] If `5k-10k` rows pass gates, freeze a first training snapshot and run a small LoRA/DoRA pilot.

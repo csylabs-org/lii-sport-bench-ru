@@ -115,6 +115,14 @@
   - synthesized `192` additional grounded examples through `agy`
   - rebuilt current retained release at `552/552` with no PII, duplicate, license, or benchmark-leakage drops
   - rules coverage increased from `30` to `198` retained examples; sport-specific rows increased for hockey, volleyball, basketball, swimming, football, athletics, and gymnastics
+- Added coverage reporting and second balanced scale pass:
+  - new CLI: `tools/corpus-prep/coverage_report.py`
+  - chunker now round-robins across multiple PDFs inside a source family, skips existing chunk rows by default, and supports `--batch-id` to avoid id collisions between scale batches
+  - generated `128` balanced section chunks from saved federation/MinSport raw documents
+  - synthesized `384` additional grounded examples through `agy`
+  - cleaned extraction-noise glyphs from generated source excerpts before rebuilding
+  - rebuilt current retained release at `936/936` with no PII, duplicate, license, or benchmark-leakage drops
+  - coverage report still flags `below_sft_gate_5k`, `history_below_20pct`, `methodology_below_25pct`, and `winter_sports_missing`
 - Documented scale-up boundary:
   - current federation rows are validation-scale rows, not final training volume
   - production corpus generation should widen section/page chunked synthesis over clean extracted text and keep human-approved/internal rows separate from public-release lanes
@@ -168,8 +176,8 @@
 
 ### Next steps
 
-1. Widen section-chunked generation beyond the current `8` chunks/source validation batch, keeping the human-approved/internal label.
-2. Scale Лесгафта/RCSI article coverage beyond the 12-article CC BY smoke batch.
+1. Add winter-sport rules/methodology sources; current coverage report still flags `winter_sports_missing`.
+2. Scale Лесгафта/RCSI and CyberLeninka CC BY coverage beyond the current smoke batches.
 3. Keep `teoriya.ru` blocked unless explicit reuse permission is obtained.
 
 ## v0.1 — 7-Model Open-vs-Closed Pilot (May 18, 2026)
