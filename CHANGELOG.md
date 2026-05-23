@@ -1,5 +1,171 @@
 # Changelog
 
+## Unreleased — Corpus-Building Lane (May 23, 2026)
+
+**Status:** First high-signal source batch complete. `agy` selected as the default cheap generation lane. Corpus collection is Mac-first; NVIDIA is deferred to SFT training.
+
+### What shipped
+
+- Added `tools/corpus-prep/` corpus pipeline scaffold:
+  - verified source registry
+  - capped resumable static harvester
+  - grounded Q&A synthesis
+  - benchmark-leakage, PII, duplicate, license, and split gates
+  - release artifacts (`train.jsonl`, `val.jsonl`, `test.jsonl`, manifests, hashes, license matrix, stats)
+- Centralized secret lookup without committed secret values:
+  - exported env vars and repo-local ignored `.env.local`
+  - optional vault root via `CSYLABS_VAULT_ROOT`
+  - optional explicit path lists for Gemini/OpenRouter fallback env files
+- Added Antigravity CLI provider:
+  - default provider: `agy`
+  - model label: `antigravity-default-gemini-3.5-flash`
+  - OpenRouter remains the fallback/baseline lane
+- Added MinSport document API/PDF lane:
+  - Next/Strapi document API discovery for `minsport.gov.ru`
+  - `pdftotext` extraction for text PDFs
+  - Tesseract OCR fallback for scanned PDFs (`rus+eng`)
+  - curl fallback for MinSport TLS/API fetches
+- Added RCSI/Лесгафта methodology article lane:
+  - current issue article discovery
+  - per-article `DC.Rights=https://creativecommons.org/licenses/by/4.0` license gate
+  - article metadata/abstract extraction for the first smoke batch
+- Blocked `teoriya.ru` for training use pending permission:
+  - current site footer states that all material rights belong to `teoriya.ru`
+  - current site footer states copying materials is prohibited
+- Confirmed local Mac corpus-prep stack:
+  - Apple Silicon Mac is the default machine for harvest, PDF extraction, OCR, cleaning, and split generation
+  - NVIDIA GPU is not required for corpus collection; keep it for Gemma 4 31B SFT / Unsloth / FA2 training
+- Fixed prompt hygiene:
+  - source text is scrubbed for phone/email/SNILS-style PII before generation
+  - final corpus scan gates still run after generation
+- Hardened model-output parsing:
+  - synthesis now accepts the first JSON array when `agy` adds trailing commentary
+- Fixed long-document synthesis quality:
+  - OCR prompts now sample beginning, middle, and end of long documents
+  - generic prompt wording no longer assumes every source is anti-doping material
+- First retained RUSADA high-signal batch:
+  - `51` generated examples from 17 source pages
+  - `51` kept after cleaning
+  - split: `46 train / 3 val / 2 test`
+  - no PII/leak scan hits
+- Expanded retained RUSADA high-signal batch:
+  - `103` raw crawled RUSADA pages
+  - `29` Russian high-signal pages selected after URL filtering
+  - `87` generated examples
+  - `87` kept after cleaning
+- First retained EVSK/EKP batch:
+  - `3` MinSport PDFs extracted
+  - `9` generated examples
+  - `9` kept after cleaning
+- First retained OCR federal-standards batch:
+  - `3` scanned MinSport federal-standard PDFs OCRed
+  - sports covered in smoke batch: eastern martial arts, darts, marine multiathlon
+  - `9` generated examples
+  - `9` kept after cleaning
+- Expanded Mac OCR federal-standards review batch:
+  - `12` scanned MinSport federal-standard PDFs OCRed
+  - `36` generated examples
+  - `36` kept after cleaning
+- Scaled strict MinSport federal-standard checkpoint:
+  - strict MinSport API discovery currently yields `21` verified federal-standard PDFs
+  - `63` generated examples
+  - `63` kept after cleaning
+- First retained Лесгафта methodology batch:
+  - `12` RCSI article records harvested from the current issue
+  - every retained article exposed CC BY 4.0 in `DC.Rights`
+  - `36` generated examples
+  - `36` kept after cleaning
+- Added human-approved federation-rules lane:
+  - source id: `fed-rules-approved`
+  - approval note: Daniel approved federation and MinSport documents for the working corpus on `2026-05-23`
+  - retained rows carry `requires_human_approval=true` and `license_kind=human-approved-federation-public-doc`
+  - downloader cap raised from 20 MB to 80 MB after FHR PDFs exposed a truncation failure at exactly 20,000,000 bytes
+- First retained federation-rules batch:
+  - `4` FHR hockey PDF documents extracted
+  - `12` generated examples through `agy`
+  - `12` kept after cleaning
+- First retained volleyball federation-rules batch:
+  - `2` VFR PDF documents extracted from the official volleyball rules page
+  - retained synthesis uses the clean `2025` Минспорт-approved volleyball rules PDF
+  - the advertised FIVB `2025-2028` PDF link currently returns HTML and is rejected by the PDF gate
+  - the older FIVB `2021-2024` PDF is retained raw but excluded from synth because extracted text produced mojibake-contaminated answers
+  - `3` generated examples through `agy`
+  - `3` kept after cleaning
+- Added direct-PDF federation source support:
+  - approved source endpoints can now be direct `.pdf` URLs, not only HTML pages with PDF links
+  - this is needed for federation pages where the canonical rules link is stable but the document listing is dynamic or stale
+- First retained basketball federation-rules batch:
+  - `1` RFB official basketball rules PDF extracted
+  - the old RFB rules page currently returns `404` on the live Nuxt site, but the official PDF remains reachable
+  - the listed official-interpretations URL currently returns `404`, so it is excluded
+  - `3` generated examples through `agy`
+  - `3` kept after cleaning
+- First retained swimming federation-rules batch:
+  - `1` 2026 Federation/Минспорт swimming rules PDF extracted
+  - `3` generated examples through `agy`
+  - `3` kept after cleaning
+- Combined current retained release:
+  - `360` generated examples
+  - `360` kept after cleaning
+  - split: `332 train / 16 val / 12 test`
+  - source mix: `87` RUSADA, `9` EVSK/EKP, `63` MinSport federal standards, `36` Лесгафта, `72` CC BY CyberLeninka sport-history rows, `48` Wikidata CC0 sport-fact rows, `15` official/internal history rows, `12` FHR hockey rules, `3` VFR volleyball rules, `3` RFB basketball rules, `3` swimming rules, `3` RFS football rules, `3` RusAthletics rules, `3` sport gymnastics rules
+- Documented scale-up boundary:
+  - current federation rows are source-validation smoke rows
+  - production corpus generation should first complete official PDF inventory, then run section/page chunked synthesis over clean extracted text
+  - added approximate production targets per source family in `tools/corpus-prep/README.md`
+- Expanded federation document inventory:
+  - added human-approved/internal source ids for RFS football, RusAthletics athletics, and sport gymnastics rules PDFs
+  - harvested and saved the PDFs under ignored `corpus/raw/<source-id>/documents/`
+  - extracted one raw record per new source and retained `3` smoke rows per source through `agy`
+  - wrestling remains pending because the official documents page currently exposes a templated PDF URL with an unresolved `{item_id}` placeholder
+- Added bench-gap history source lane:
+  - source id: `sport-history-ccby-cyberleninka`
+  - first 24 CC BY CyberLeninka sport-history/legal-history PDFs harvested and saved under ignored raw documents
+  - PDF fallback added because CyberLeninka HTML extraction was abstract-only
+  - `72` generated history examples through `agy`
+  - `72` kept after cleaning
+- Added official/internal history source lane:
+  - source id: `sport-history-official-approved`
+  - first 5 federation/official history pages harvested behind `--include-human-approval`
+  - `15` generated history examples through `agy`
+  - `15` kept after cleaning
+  - main-content extraction now prefers `main`/`article`/content blocks and trims common official-page navigation boilerplate
+- Added Wikidata CC0 sport-facts lane:
+  - source id: `sport-facts-wikidata-cc0`
+  - first 16 Russian/Soviet athlete fact records harvested from Wikidata SPARQL
+  - `48` generated history/factual examples through `agy`
+  - `48` kept after cleaning
+  - next scale-up should diversify by sport/event instead of relying on one broad athlete query
+
+### A/B result
+
+| Provider | Generated | Kept | Drops | Notes |
+|---|---:|---:|---:|---|
+| Antigravity CLI `agy` | 36 | 36 | 0 | Slower, cheaper/subscription lane, no per-call cost accounting |
+| OpenRouter `google/gemini-3.5-flash` | 36 | 34 | 2 | Faster, model-pinned, paid/token-metered fallback |
+
+### Full-current raw diagnostic
+
+- The retained RUSADA release uses URL filtering before generation:
+  - include Russian `/athletes`, `/doping-control`, `/substances`, `/federations_leagues`, and selected `/education/*` pages
+  - exclude English duplicates, contact/request/calendar/news/disqualification/admin pages
+- MinSport federal-standard PDFs require OCR; the current strict-query Tesseract checkpoint retains 21 PDFs.
+
+### Cleanup
+
+- Removed stale ignored comparison artifacts and old OpenRouter-first batch folders.
+- Kept only:
+  - raw RUSADA harvest
+  - raw EVSK/EKP harvest
+  - retained `agy` synthesized JSONLs
+  - combined current `agy` release folder
+
+### Next steps
+
+1. Section-chunk the saved federation PDFs beyond smoke volume, keeping the human-approved/internal label.
+2. Scale Лесгафта/RCSI article coverage beyond the 12-article CC BY smoke batch.
+3. Keep `teoriya.ru` blocked unless explicit reuse permission is obtained.
+
 ## v0.1 — 7-Model Open-vs-Closed Pilot (May 18, 2026)
 
 **Status:** Pilot complete. Public release.
