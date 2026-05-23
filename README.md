@@ -131,7 +131,7 @@ Current status:
 - Corpus collection/prep runs Mac-first: local `pdftotext` + Tesseract `rus+eng` OCR on Apple Silicon, with NVIDIA reserved for later SFT training.
 - Default generation lane: Antigravity CLI `agy` using Gemini 3.5 Flash routing.
 - Fallback/audit lane: OpenRouter `google/gemini-3.5-flash`.
-- Current retained corpus: expanded RUSADA high-signal anti-doping + MinSport ЕКП/EVSK procedures + 21-document OCR federal standards checkpoint + CC BY Лесгафта methodology articles + CC BY CyberLeninka sport-history articles + Wikidata CC0 sport facts + human-approved official history pages + human-approved federation rules batches for hockey, volleyball, basketball, swimming, football, athletics, and gymnastics, plus two section-chunk passes over saved federation/MinSport PDFs, `936/936` examples kept after cleaning.
+- Current retained corpus: expanded RUSADA high-signal anti-doping + MinSport ЕКП/EVSK procedures + 21-document OCR federal standards checkpoint + CC BY Лесгафта methodology articles + CC BY CyberLeninka sport-history articles + Wikidata CC0 sport facts + human-approved official history pages + human-approved federation rules batches for hockey, volleyball, basketball, swimming, football, athletics, gymnastics, and winter sports, plus two section-chunk passes over saved federation/MinSport PDFs, `954/954` examples kept after cleaning.
 - Count semantics: corpus counts are generated SFT Q&A examples, not source-document counts. Source documents/pages are tracked separately under ignored `corpus/raw/`.
 - The current federation rows are useful validation-scale data but still below the SFT gate. Production scale-up is documented in [`tools/corpus-prep/README.md`](./tools/corpus-prep/README.md): keep widening high-signal chunks where coverage remains low, but prioritize winter sports and open-license CC BY/CC0 methodology/history next.
 - Federation-rule examples are marked `requires_human_approval=true` and `license_kind=human-approved-federation-public-doc`; keep them separate from clean open-license publication lanes until downstream release policy is decided.
@@ -139,7 +139,7 @@ Current status:
 
 Next corpus milestones:
 
-1. Add winter-sport rules/methodology sources; current coverage report still flags `winter_sports_missing`.
+1. Scale the newly harvested winter-sport PDFs from smoke coverage (`18` retained rows) toward a chunked `500-1000` row lane, keeping federation/MinSport rows internal until release policy is clear.
 2. Scale CC BY/CC0 coverage beyond the current 12 Лесгафта/RCSI articles, 24 CyberLeninka sport-history articles, and 16 Wikidata fact records; keep official/internal history separate until release policy is clear.
 3. Keep `teoriya.ru` blocked unless explicit reuse permission is obtained; current site footer says copying materials is prohibited.
 

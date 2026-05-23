@@ -1187,6 +1187,12 @@ def _infer_sport(value: str) -> str:
         ("athletics", ["легк", "rusathletics", "athletics"]),
         ("wrestling", ["борьб", "wrestrus", "wrestling"]),
         ("gymnastics", ["гимнаст", "sportgymrus", "gymnastics"]),
+        ("biathlon", ["биатлон", "biathlon"]),
+        ("alpine-skiing", ["горнолыж", "gornolyzhn", "alpine"]),
+        ("skiing", ["лыжные гонки", "лыжн", "flgr", "ski"]),
+        ("snowboard", ["сноуборд", "snoubord", "snowboard"]),
+        ("figure-skating", ["фигурное катание", "fsrussia", "figure"]),
+        ("speed-skating", ["конькобеж", "konkobezh", "speed skating"]),
     ]
     for sport, markers in sport_markers:
         if any(marker in normalized for marker in markers):
