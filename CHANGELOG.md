@@ -2,7 +2,7 @@
 
 ## Unreleased — Corpus-Building Lane (May 23, 2026)
 
-**Status:** First high-signal source batch complete. `agy` selected as the default cheap generation lane. Corpus collection is Mac-first; NVIDIA is deferred to SFT training.
+**Status:** First high-signal source batch complete and scaled to a `2208/2217` clean checkpoint. `agy` remains the default cheap generation lane, with OpenRouter used as fallback when `agy` returns malformed or empty output. Corpus collection is Mac-first; NVIDIA is deferred to SFT training.
 
 ### What shipped
 
@@ -131,6 +131,30 @@
   - generated `18` grounded smoke rows through `agy`
   - rebuilt current retained release at `954/954` with no PII, duplicate, license, or benchmark-leakage drops
   - coverage report no longer flags `winter_sports_missing`; remaining flags are `below_sft_gate_5k`, `history_below_20pct`, and `methodology_below_25pct`
+- Scaled the winter-sport lane:
+  - section-chunked the saved winter PDFs into `180` chunks
+  - generated `540` additional grounded rows through `agy`
+  - winter-sport retained rows now total `558`, inside the documented `500-1000` internal-row target band
+- Added CC BY CyberLeninka sport-methodology lane:
+  - source id: `sport-methodology-ccby-cyberleninka`
+  - registered `11` CC BY article endpoints covering sport methodology, biomechanics, planning, selection, and training concepts
+  - harvested `11` article records, with `10` PDF full texts and `1` HTML full text saved under ignored raw artifacts
+  - generated `33` smoke rows plus `252` section-chunk rows through `agy`
+  - generated a `108`-row OpenRouter top-up after the corresponding `agy` top-up returned empty output
+  - retained `393` rows from this source in the current clean release
+- Scaled CC BY CyberLeninka sport-history:
+  - built a `120`-chunk history pool and rejected `9` mojibake/noise-heavy chunks before synthesis
+  - `agy` returned malformed/empty output for this history batch, so OpenRouter `google/gemini-3.5-flash` produced the retained `330` section-chunk rows
+  - sport-history source retained rows now total `396`, inside the documented `300-600` row target band
+- Hardened long-batch synthesis:
+  - malformed model JSON responses are skipped instead of aborting the entire job
+  - source excerpts with mojibake/extraction-noise markers are dropped during cleaning
+  - zero-row synthesis output is treated as invalid for scale-up and should trigger inspection/fallback before rebuilding
+- Current retained corpus checkpoint:
+  - `2217` generated examples
+  - `2208` kept after cleaning
+  - `9` dropped by the extraction-noise gate
+  - content-balance flags are cleared; only `below_sft_gate_5k` remains
 - Tightened the PII gate for standalone INN-like identifiers:
   - ВРВС sport-discipline codes such as `0420013611Я` are no longer dropped as false-positive INN-like PII
   - added regression coverage for retained sport discipline codes
@@ -179,16 +203,12 @@
 ### Cleanup
 
 - Removed stale ignored comparison artifacts and old OpenRouter-first batch folders.
-- Kept only:
-  - raw RUSADA harvest
-  - raw EVSK/EKP harvest
-  - retained `agy` synthesized JSONLs
-  - combined current `agy` release folder
+- Current ignored corpus artifacts are retained locally under `corpus/raw/`, `corpus/synth/`, and the combined clean release folder; they remain out of git until a reviewed publication snapshot is cut.
 
 ### Next steps
 
-1. Section-chunk the retained winter-sport PDFs toward `500-1000` internal rows.
-2. Scale Лесгафта/RCSI and CyberLeninka CC BY coverage beyond the current smoke batches.
+1. Scale the current `2208/2217` checkpoint to `5k-10k` clean high-signal rows before any SFT attempt.
+2. Expand open-license methodology/history/biomechanics/sport-medicine coverage and undercovered sport breadth.
 3. Keep `teoriya.ru` blocked unless explicit reuse permission is obtained.
 
 ## v0.1 — 7-Model Open-vs-Closed Pilot (May 18, 2026)

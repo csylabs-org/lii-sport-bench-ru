@@ -41,6 +41,9 @@ def clean_examples(
         if not example.get("license_kind") or example.get("license_verified") is False:
             dropped["license"] += 1
             continue
+        if _has_extraction_noise(str(example.get("source_excerpt", ""))):
+            dropped["extraction_noise"] += 1
+            continue
         if _has_pii(text):
             dropped["pii"] += 1
             continue
@@ -72,6 +75,14 @@ def _normalize(text: str) -> str:
 
 def _has_pii(text: str) -> bool:
     return any(pattern.search(text) for pattern in PII_PATTERNS)
+
+
+def _has_extraction_noise(text: str) -> bool:
+    if "\ufffd" in text:
+        return True
+    if re.search(r"[À-ÿ]{4,}", text):
+        return True
+    return False
 
 
 def _bench_leakage(text: str, bench_texts: list[str]) -> bool:
