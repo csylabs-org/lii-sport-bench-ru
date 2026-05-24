@@ -30,7 +30,11 @@ def synthesize_examples(
         if on_raw_start:
             on_raw_start(raw_index, raw)
         response = generate(_prompt_for_raw(raw, questions_per_chunk=questions_per_chunk))
-        for index, qa in enumerate(_parse_qa_json(response), start=1):
+        try:
+            parsed = _parse_qa_json(response)
+        except (json.JSONDecodeError, ValueError):
+            continue
+        for index, qa in enumerate(parsed, start=1):
             question = str(qa.get("question", "")).strip()
             answer = str(qa.get("answer", "")).strip()
             if not question or not answer:

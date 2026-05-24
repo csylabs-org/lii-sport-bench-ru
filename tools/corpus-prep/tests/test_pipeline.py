@@ -116,12 +116,16 @@ class CorpusPrepPipelineTests(unittest.TestCase):
         by_id = {source["id"]: source for source in sources}
         fed_rules = by_id["fed-rules"]
         winter = by_id["winter-sports-approved"]
+        methodology = by_id["sport-methodology-ccby-cyberleninka"]
 
         self.assertTrue(fed_rules["requires_human_approval"])
         self.assertEqual(fed_rules["license_kind"], "license-check-required")
         self.assertTrue(winter["requires_human_approval"])
         self.assertTrue(winter["direct_document"])
         self.assertEqual(winter["license_kind"], "human-approved-federation-public-doc")
+        self.assertFalse(methodology["requires_human_approval"])
+        self.assertEqual(methodology["license_kind"], "cc-by-article")
+        self.assertIn("methodology", methodology["bench_categories"])
 
     def test_coverage_report_tracks_license_and_undercoverage(self):
         from corpus_prep.coverage import build_coverage_report
@@ -234,6 +238,43 @@ class CorpusPrepPipelineTests(unittest.TestCase):
 
         self.assertEqual([example["id"] for example in cleaned], ["sport-code"])
         self.assertEqual(report["dropped"], {})
+
+    def test_clean_pipeline_drops_mojibake_source_excerpt(self):
+        from corpus_prep.clean import clean_examples
+
+        examples = [
+            {
+                "id": "bad-excerpt",
+                "license_kind": "cc-by-article",
+                "license_verified": True,
+                "source_excerpt": "Òåîðèÿ è ìåòîäèêà ñïîðòà âûñøèõ äîñòèæåíèé",
+                "messages": [
+                    {"role": "user", "content": "Как соревнования помогают управлять подготовкой?"},
+                    {
+                        "role": "assistant",
+                        "content": "Соревнования дают контрольные ориентиры для планирования подготовки.",
+                    },
+                ],
+            },
+            {
+                "id": "ok-excerpt",
+                "license_kind": "cc-by-article",
+                "license_verified": True,
+                "source_excerpt": "Теория и методика спорта высших достижений",
+                "messages": [
+                    {"role": "user", "content": "Как соревнования помогают планировать подготовку?"},
+                    {
+                        "role": "assistant",
+                        "content": "Они позволяют сверять тренировочные задачи с календарем стартов.",
+                    },
+                ],
+            },
+        ]
+
+        cleaned, report = clean_examples(examples, [], min_chars=10)
+
+        self.assertEqual([example["id"] for example in cleaned], ["ok-excerpt"])
+        self.assertEqual(report["dropped"]["extraction_noise"], 1)
 
     def test_make_splits_writes_manifest_hashes_without_overlap(self):
         from corpus_prep.splits import make_splits
@@ -1073,6 +1114,37 @@ class CorpusPrepPipelineTests(unittest.TestCase):
         )
 
         self.assertEqual(seen, [(1, "raw-1")])
+
+    def test_synthesize_examples_skips_malformed_model_response(self):
+        from corpus_prep.synthesize import synthesize_examples
+
+        raw_examples = [
+            {
+                "id": "raw-1",
+                "source_id": "rusada-edu",
+                "license_kind": "public-ru-state-agency",
+                "license_verified": True,
+                "text": "Антидопинговое обучение помогает спортсмену проверять препараты до старта. " * 6,
+            },
+            {
+                "id": "raw-2",
+                "source_id": "rusada-edu",
+                "license_kind": "public-ru-state-agency",
+                "license_verified": True,
+                "text": "Права спортсмена при допинг-контроле включают получение информации и сопровождение. " * 6,
+            },
+        ]
+
+        responses = iter(
+            [
+                "В этом фрагменте недостаточно данных для JSON.",
+                '[{"question":"Что вправе получить спортсмен?","answer":"Спортсмен вправе получить информацию о процедуре допинг-контроля."}]',
+            ]
+        )
+
+        examples = synthesize_examples(raw_examples, lambda _prompt: next(responses), questions_per_chunk=1)
+
+        self.assertEqual([example["id"] for example in examples], ["raw-2-qa-1"])
 
     def test_synthesis_keeps_source_excerpt_out_of_training_text(self):
         from corpus_prep.synthesize import synthesize_examples

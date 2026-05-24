@@ -30,10 +30,11 @@ Highest-leverage weak buckets from the 200-question pilot:
 
 | Lane | Source id | License posture | First target | Why |
 |---|---|---|---|---|
-| CC BY sport history papers | `sport-history-ccby-cyberleninka` | public-safe if page exposes CC BY | 300-600 rows | Expanded smoke batch retained: 24 PDFs -> 72 rows |
+| CC BY sport history papers | `sport-history-ccby-cyberleninka` | public-safe if page exposes CC BY | 300-600 rows | Scaled to 396 retained rows after filtered section chunks and extraction-noise cleaning |
+| CC BY sport methodology papers | `sport-methodology-ccby-cyberleninka` | public-safe if page exposes CC BY | 300-600 rows | Scaled to 393 retained rows across methodology, biomechanics, planning, selection, and training concepts |
 | CC0 sport facts | `sport-facts-wikidata-cc0` | public-safe | 300-600 rows | First smoke batch retained: 16 records -> 48 rows |
 | Official history pages | `sport-history-official-approved` | human-approved/internal | 500-1000 rows | Federation and OKR timelines, milestones, biographies |
-| Winter sport rules/methodology | `winter-sports-approved` + CC BY article filters | mixed; keep separated | 500-1000 rows | First smoke retained: 6 PDFs -> 18 rows; biggest sport-level gap |
+| Winter sport rules/methodology | `winter-sports-approved` + CC BY article filters | mixed; keep separated | 500-1000 rows | Scaled to 558 retained rows after winter PDF section chunks |
 | Section-chunked saved PDFs | existing federation/MinSport source ids | mixed; keep separated | 1500-3000 rows | Fastest way to scale from already saved docs |
 
 ## Task 1: Add Registry Entries
@@ -115,7 +116,22 @@ Highest-leverage weak buckets from the 200-question pilot:
 - [x] Harvest 6 winter PDFs into ignored `corpus/raw/winter-sports-approved/documents/`.
 - [x] Generate smoke rows through `agy`: 6 PDFs -> 18 retained rows.
 - [x] Rebuild combined clean release at `954/954`; coverage no longer reports `winter_sports_missing`.
-- [ ] Section-chunk the saved winter PDFs toward 500-1000 rows before SFT.
+- [x] Section-chunk the saved winter PDFs toward 500-1000 rows before SFT: 180 chunks -> 540 new rows; winter total `558` retained rows.
+
+## Task 4.7: Add CC BY Methodology Lane
+
+**Files:**
+- Modify: `tools/corpus-prep/sources.yaml`
+- Modify: `tools/corpus-prep/corpus_prep/registry.py`
+- Write ignored raw data under `corpus/raw/sport-methodology-ccby-cyberleninka/`
+
+- [x] Add `sport-methodology-ccby-cyberleninka` with `harvester=cyberleninka_article_list`, `license_kind=cc-by-article`, `license_verified=true`, `requires_human_approval=false`.
+- [x] Register 11 CC BY CyberLeninka article endpoints covering methodology, biomechanics, sport selection, planning, volleyball, skiing, and integral preparation.
+- [x] Harvest 11 article records with 10 PDF full texts and 1 HTML full text saved under ignored raw documents.
+- [x] Generate smoke rows through `agy`: 11 articles -> 33 rows.
+- [x] Section-chunk the methodology corpus: 84 chunks -> 252 `agy` rows.
+- [x] Use OpenRouter fallback for the second methodology top-up when `agy` returned empty output: 36 chunks -> 108 rows.
+- [x] Rebuild combined clean release with `393` retained rows from this source.
 
 ## Task 5: Production Scale Decision
 
@@ -125,4 +141,9 @@ Highest-leverage weak buckets from the 200-question pilot:
 - [x] Add `coverage_report.py` and produce a source/corpus coverage report by `source_id`, `sport`, `category`, `audience proxy`, and license lane.
 - [x] Run second balanced section-chunk scale pass over saved federation/MinSport PDFs: `128` chunks -> `384` new `agy` rows -> combined clean release at `936/936`.
 - [x] Confirm current corpus is still below SFT gate: `954` rows total, with history/СШОР/ВУЗ/methodology still under-covered; winter sports now have smoke coverage but need scale.
+- [x] Scale saved winter PDFs: `180` chunks -> `540` new `agy` rows; winter total now `558` retained rows.
+- [x] Scale CC BY history: `120`-chunk pool -> `111` filtered chunks after rejecting `9` noisy chunks -> `330` OpenRouter rows; sport-history source now `396` retained rows after cleaning old noisy smoke rows.
+- [x] Scale CC BY methodology: 11 article records + section chunks + OpenRouter fallback top-up -> `393` retained rows.
+- [x] Rebuild current clean release at `2208/2217`; `9` source-excerpt extraction-noise rows dropped, content-balance flags are cleared, and only `below_sft_gate_5k` remains.
+- [x] Confirm current corpus is still below SFT gate: `2208` rows total. Do not train yet.
 - [ ] If `5k-10k` rows pass gates, freeze a first training snapshot and run a small LoRA/DoRA pilot.

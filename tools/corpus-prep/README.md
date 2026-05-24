@@ -7,10 +7,10 @@ Offline-safe corpus pipeline scaffold for the Selectel AR45G validation batch.
 - Recommended provider: `agy` (Antigravity CLI, Gemini 3.5 Flash default routing).
 - Fallback provider: OpenRouter `google/gemini-3.5-flash`.
 - Runtime decision: collect/prep on the Mac first (`pdftotext` + Tesseract `rus+eng` OCR); reserve NVIDIA for Gemma 4 31B SFT training.
-- Current retained release: expanded RUSADA high-signal anti-doping + MinSport ЕКП/EVSK procedures + 21-document OCR federal standards checkpoint + CC BY Лесгафта methodology articles + CC BY CyberLeninka sport-history articles + Wikidata CC0 sport facts + human-approved official history pages + human-approved federation rules batches for hockey, volleyball, basketball, swimming, football, athletics, gymnastics, and winter sports, plus two section-chunk passes over saved federation/MinSport PDFs, `954/954` examples kept after cleaning.
+- Current retained release: expanded RUSADA high-signal anti-doping + MinSport ЕКП/EVSK procedures + 21-document OCR federal standards checkpoint + CC BY Лесгафта methodology articles + CC BY CyberLeninka sport-history and sport-methodology articles + Wikidata CC0 sport facts + human-approved official history pages + human-approved federation rules batches for hockey, volleyball, basketball, swimming, football, athletics, gymnastics, and winter sports, plus section-chunk passes over saved federation/MinSport/winter PDFs, `2208/2217` examples kept after cleaning.
 - Corpus example counts are generated SFT Q&A rows. Source counts are separate raw pages/PDFs/article records under `corpus/raw/`.
 - Federation-rule rows are retained for the working/internal corpus only: `requires_human_approval=true`, `license_kind=human-approved-federation-public-doc`.
-- New federation source inventory has saved football, athletics, gymnastics, and winter-sport PDFs under `corpus/raw/<source-id>/documents/`; the first smoke rows are retained in the current release.
+- New federation source inventory has saved football, athletics, gymnastics, and winter-sport PDFs under `corpus/raw/<source-id>/documents/`; winter sport PDFs are now section-chunked into the current internal release.
 - Retained generated artifacts:
   - `corpus/raw/rusada-edu/harvest.jsonl`
   - `corpus/raw/evsk-ekp/harvest.jsonl`
@@ -24,9 +24,14 @@ Offline-safe corpus pipeline scaffold for the Selectel AR45G validation batch.
   - `corpus/raw/fed-rules-athletics-approved/harvest.jsonl`
   - `corpus/raw/fed-rules-gymnastics-approved/harvest.jsonl`
   - `corpus/raw/winter-sports-approved/harvest.jsonl`
+  - `corpus/raw/sport-methodology-ccby-cyberleninka/harvest.jsonl`
   - `corpus/raw/sport-history-ccby-cyberleninka/harvest.jsonl`
   - `corpus/raw/sport-history-official-approved/harvest.jsonl`
   - `corpus/raw/sport-facts-wikidata-cc0/harvest.jsonl`
+  - `corpus/raw/section-chunks-winter-sports-current/harvest.jsonl`
+  - `corpus/raw/section-chunks-methodology-ccby-current/harvest.jsonl`
+  - `corpus/raw/section-chunks-methodology-ccby-balanced-02/harvest.jsonl`
+  - `corpus/raw/section-chunks-history-ccby-filtered/harvest.jsonl`
   - `corpus/synth/agy-rusada-high-signal-current.jsonl`
   - `corpus/synth/agy-evsk-ekp-current.jsonl`
   - `corpus/synth/agy-minsport-fed-standards-ocr-current.jsonl`
@@ -41,7 +46,12 @@ Offline-safe corpus pipeline scaffold for the Selectel AR45G validation batch.
   - `corpus/synth/agy-winter-sports-approved-current.jsonl`
   - `corpus/synth/agy-section-chunks-fed-minsport-current.jsonl`
   - `corpus/synth/agy-section-chunks-fed-minsport-balanced-01.jsonl`
+  - `corpus/synth/agy-section-chunks-winter-sports-current.jsonl`
   - `corpus/synth/agy-sport-history-ccby-cyberleninka-current.jsonl`
+  - `corpus/synth/agy-sport-methodology-ccby-cyberleninka-current.jsonl`
+  - `corpus/synth/agy-section-chunks-methodology-ccby-current.jsonl`
+  - `corpus/synth/openrouter-section-chunks-history-ccby-current.jsonl`
+  - `corpus/synth/openrouter-section-chunks-methodology-ccby-balanced-02.jsonl`
   - `corpus/synth/agy-sport-history-official-approved-current.jsonl`
   - `corpus/synth/agy-sport-facts-wikidata-cc0-current.jsonl`
   - `corpus/lii-sport-sft-v0.1-current-agy-clean/`
@@ -67,15 +77,16 @@ Approximate production targets after chunking:
 | RFS football 2025 rules PDF | 75 | 100-180 | Continue section chunking toward target |
 | RusAthletics 2023 rules PDF | 75 | 80-150 | Near production target |
 | Sport Gymnastics 2022 rules PDF | 75 | 80-150 | Near production target |
-| Winter sport federation/MinSport PDFs | 18 | 500-1000 | Smoke retained across biathlon, cross-country skiing, alpine skiing, figure skating, and snowboard; next step is section chunking |
+| Winter sport federation/MinSport PDFs | 558 | 500-1000 | Inside lower target band after 180 section chunks -> 540 rows; keep internal/human-approved |
 | MinSport federal standards | 135 | 200+ | Second balanced pass now covers more standards documents; continue methodology/СШОР scaling |
 | RUSADA high-signal pages | 87 | 120-200 | Good URL-filtered source set; can expand cautiously |
 | Лесгафта/RCSI CC BY articles | 36 | 100+ | Needs more CC BY article inventory beyond current issue |
-| CyberLeninka CC BY sport-history PDFs | 72 | 300-600 | First 24 full-text PDFs retained; expand article inventory |
+| CyberLeninka CC BY sport-history PDFs | 396 | 300-600 | Inside target band after filtered section chunks; 9 noisy chunks rejected before synthesis and 6 old noisy smoke rows dropped by cleaning |
+| CyberLeninka CC BY sport-methodology PDFs | 393 | 300-600 | Inside target band after article smoke + section chunks + OpenRouter top-up |
 | Official/internal history pages | 15 | 500-1000 | First 5 pages retained behind `--include-human-approval`; needs cleaner page extraction |
 | Wikidata CC0 sport facts | 48 | 300-600 | First 16 Russian/Soviet athlete facts retained; query should be diversified by sport/event |
 
-Current immediate task: scale the winter-sport smoke lane with section chunks, then expand open-license methodology/history before running more of the same rules chunks. Wrestling remains pending because the official documents page currently exposes a templated PDF URL with an unresolved `{item_id}` placeholder; resolve the live API/JS document id before harvesting it.
+Current immediate task: scale the `2208/2217` checkpoint to `5k-10k` rows before any SFT attempt. Prioritize open-license methodology/history/sport-science breadth and undercovered sports, while keeping human-approved federation and official-history rows in the internal lane. Wrestling remains pending because the official documents page currently exposes a templated PDF URL with an unresolved `{item_id}` placeholder; resolve the live API/JS document id before harvesting it.
 
 ## Bench-Gap Source Expansion
 
@@ -85,13 +96,14 @@ Priority new lanes:
 
 | Lane | Source id | License posture | First target |
 |---|---|---|---:|
-| CC BY sport-history papers | `sport-history-ccby-cyberleninka` | Public-safe if each article exposes CC BY | 300-600 rows; first 72 retained |
+| CC BY sport-history papers | `sport-history-ccby-cyberleninka` | Public-safe if each article exposes CC BY | 300-600 rows; 396 retained |
+| CC BY sport-methodology papers | `sport-methodology-ccby-cyberleninka` | Public-safe if each article exposes CC BY | 300-600 rows; 393 retained |
 | CC0 structured sport facts | `sport-facts-wikidata-cc0` | Public-safe | 300-600 rows; first 48 retained |
 | Official federation/OKR history pages | `sport-history-official-approved` | Human-approved/internal | 500-1000 rows; first 15 retained |
-| Winter-sport rules/methodology | `winter-sports-approved` + CC BY filters | Mixed; keep separated | 500-1000 rows; first 18 retained |
+| Winter-sport rules/methodology | `winter-sports-approved` + CC BY filters | Mixed; keep separated | 500-1000 rows; 558 retained |
 | Section-chunked saved PDFs | existing federation/MinSport sources | Mixed; keep separated | 1500-3000 rows |
 
-Do not start SFT from the current `954/954` validation release. The next gate is a `5k-10k` clean high-signal checkpoint; the serious public Preview target remains `30k-60k` examples.
+Do not start SFT from the current `2208/2217` validation release. The next gate is a `5k-10k` clean high-signal checkpoint; the serious public Preview target remains `30k-60k` examples.
 
 ## Commands
 
@@ -403,6 +415,83 @@ PYTHONPATH=tools/corpus-prep python3 -B tools/corpus-prep/clean.py \
   --output-name lii-sport-sft-v0.1-current-agy-clean
 ```
 
+Winter section-chunk scale pass:
+
+```bash
+PYTHONPATH=tools/corpus-prep python3 -B tools/corpus-prep/chunk_raw.py \
+  --repo-root "$PWD" \
+  --input-root "$PWD/corpus/raw" \
+  --output "$PWD/corpus/raw/section-chunks-winter-sports-current/harvest.jsonl" \
+  --source-id winter-sports-approved \
+  --chunks-per-source 180 \
+  --chunk-chars 4500 \
+  --min-chars 800 \
+  --batch-id winter-scale-01
+
+python3 -B tools/corpus-prep/qa_synthesize.py \
+  --repo-root "$PWD" \
+  --provider agy \
+  --input-root "$PWD/corpus/raw/section-chunks-winter-sports-current" \
+  --output "$PWD/corpus/synth/agy-section-chunks-winter-sports-current.jsonl" \
+  --max-examples 180 \
+  --questions-per-chunk 3 \
+  --agy-timeout-seconds 420
+```
+
+CyberLeninka CC BY methodology scale pass:
+
+```bash
+python3 -B tools/corpus-prep/harvest.py \
+  --repo-root "$PWD" \
+  --run \
+  --source-id sport-methodology-ccby-cyberleninka \
+  --max-pages 11 \
+  --delay-seconds 0.3
+
+PYTHONPATH=tools/corpus-prep python3 -B tools/corpus-prep/chunk_raw.py \
+  --repo-root "$PWD" \
+  --input-root "$PWD/corpus/raw" \
+  --output "$PWD/corpus/raw/section-chunks-methodology-ccby-current/harvest.jsonl" \
+  --source-id sport-methodology-ccby-cyberleninka \
+  --chunks-per-source 84 \
+  --chunk-chars 3200 \
+  --min-chars 800 \
+  --batch-id methodology-scale-01
+
+python3 -B tools/corpus-prep/qa_synthesize.py \
+  --repo-root "$PWD" \
+  --provider agy \
+  --input-root "$PWD/corpus/raw/section-chunks-methodology-ccby-current" \
+  --output "$PWD/corpus/synth/agy-section-chunks-methodology-ccby-current.jsonl" \
+  --max-examples 84 \
+  --questions-per-chunk 3 \
+  --agy-timeout-seconds 420
+```
+
+CyberLeninka CC BY history filtered scale pass:
+
+```bash
+PYTHONPATH=tools/corpus-prep python3 -B tools/corpus-prep/chunk_raw.py \
+  --repo-root "$PWD" \
+  --input-root "$PWD/corpus/raw" \
+  --output "$PWD/corpus/raw/section-chunks-history-ccby-pool/harvest.jsonl" \
+  --source-id sport-history-ccby-cyberleninka \
+  --chunks-per-source 120 \
+  --chunk-chars 3000 \
+  --min-chars 800 \
+  --batch-id history-scale-02
+
+# Filter extraction-noise chunks before synthesis, then use OpenRouter if AGY returns empty output.
+python3 -B tools/corpus-prep/qa_synthesize.py \
+  --repo-root "$PWD" \
+  --provider openrouter \
+  --model google/gemini-3.5-flash \
+  --input-root "$PWD/corpus/raw/section-chunks-history-ccby-filtered" \
+  --output "$PWD/corpus/synth/openrouter-section-chunks-history-ccby-current.jsonl" \
+  --max-examples 111 \
+  --questions-per-chunk 3
+```
+
 Secret lookup:
 
 - exported `GEMINI_API_KEY` / `OPENROUTER_API_KEY`
@@ -426,7 +515,8 @@ Secret lookup:
 - API-backed OCR, translation, and Q&A synthesis are intentionally separate commands so they cannot run accidentally.
 - Source text is scrubbed for phone/email/SNILS-style PII before prompt submission and final corpora are scanned after cleaning.
 - Static HTTP harvesting is resumable and can traverse already-seen pages to discover deeper source pages without duplicating rows.
-- Synthesis parsing accepts the first JSON array if the model adds trailing commentary.
+- Synthesis parsing accepts the first JSON array if the model adds trailing commentary, and skips malformed model JSON so one bad response does not abort a long batch.
+- Source excerpts with mojibake/extraction-noise markers are dropped during cleaning; a synthesis file with `0` written rows is invalid for scale-up and should trigger inspection/fallback before rebuilding a release.
 - MinSport API/PDF harvesting supports text PDFs via `pdftotext`; scanned PDFs fall back to local Tesseract OCR (`rus+eng`).
 - Federation PDFs allow up to 80 MB per document; this avoids corrupting large public rule PDFs during download.
 - Federation harvest rejects links that end in `.pdf` but return HTML or another non-PDF payload.
@@ -437,8 +527,8 @@ Secret lookup:
 
 ## Roadmap
 
-1. Section-chunk the saved winter-sport PDFs, keeping the human-approved/internal label.
-2. Scale Лесгафта/RCSI article coverage beyond the 12-article CC BY smoke batch and diversify CyberLeninka/Wikidata coverage.
+1. Scale the current `2208/2217` checkpoint to `5k-10k` clean high-signal rows before any SFT attempt.
+2. Expand open-license methodology/history/biomechanics/sport-medicine coverage and undercovered sport breadth, while keeping internal federation rows separated.
 3. Keep `teoriya.ru` blocked unless explicit reuse permission is obtained.
 
 ## Source Backlog

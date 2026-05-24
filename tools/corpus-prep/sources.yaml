@@ -105,6 +105,28 @@
     "bench_categories": ["history", "federation-procedures", "methodology"]
   },
   {
+    "id": "sport-methodology-ccby-cyberleninka",
+    "tier": "A",
+    "endpoint": [
+      "https://cyberleninka.ru/article/n/biomehanika-dinamicheskoy-osanki-v-sportivnyh-uprazhneniyah-i-metodika-ee-formirovaniya",
+      "https://cyberleninka.ru/article/n/osnovy-sportivnoy-trenirovki-yunyh-futbolistov-na-etape-nachalnoy-podgotovki",
+      "https://cyberleninka.ru/article/n/nauchnye-osnovy-planirovaniya-sportivnoy-trenirovki-novyy-metodologicheskiy-podhod",
+      "https://cyberleninka.ru/article/n/biomehanika-sporta-v-kontekste-ontodidaktiki-ot-porozhdeniya-zhivyh-dvizheniy-k-ovladeniyu-deystviem",
+      "https://cyberleninka.ru/article/n/metodika-sportivnogo-otbora-voleybolistov-po-kriteriyu-psihomotornyh-kachestv-a-takzhe-ih-razvitie-na-etape-nachalnoy-i-sportivnoy",
+      "https://cyberleninka.ru/article/n/kontseptsiya-integralnoy-podgotovki-v-sporte",
+      "https://cyberleninka.ru/article/n/metodika-povysheniya-fizicheskoy-podgotovki-devushekvoleybolistok-18-21-let-sredstvami-fitnesa",
+      "https://cyberleninka.ru/article/n/otsenka-effektivnosti-raspredeleniya-trenirovochnyh-sredstv-v-podgotovitelnom-periode-godichnogo-tsikla-kvalifitsirovannyh",
+      "https://cyberleninka.ru/article/n/sportivnaya-podgotovka-lyzhnikov-gonschikov-16-17-let-v-usloviyah-srednegorya",
+      "https://cyberleninka.ru/article/n/sovershenstvovanie-vypolneniya-verhney-pryamoy-podachi-myacha-kvalifitsirovannymi-voleybolistkami",
+      "https://cyberleninka.ru/article/n/obuchenie-dvigatelnym-deystviyam-v-voleybole-na-osnove-teorii-uchebnoy-deyatelnosti-na-primere-dyussh-gornogo-ulusa"
+    ],
+    "harvester": "cyberleninka_article_list",
+    "license_kind": "cc-by-article",
+    "license_verified": true,
+    "requires_human_approval": false,
+    "bench_categories": ["methodology", "biomechanics", "sport-psych"]
+  },
+  {
     "id": "sport-facts-wikidata-cc0",
     "tier": "A",
     "endpoint": "https://query.wikidata.org/sparql",
