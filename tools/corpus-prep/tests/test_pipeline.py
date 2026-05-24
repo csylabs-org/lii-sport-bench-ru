@@ -117,6 +117,7 @@ class CorpusPrepPipelineTests(unittest.TestCase):
         fed_rules = by_id["fed-rules"]
         winter = by_id["winter-sports-approved"]
         methodology = by_id["sport-methodology-ccby-cyberleninka"]
+        sport_science = by_id["sport-science-ccby-cyberleninka"]
 
         self.assertTrue(fed_rules["requires_human_approval"])
         self.assertEqual(fed_rules["license_kind"], "license-check-required")
@@ -126,6 +127,9 @@ class CorpusPrepPipelineTests(unittest.TestCase):
         self.assertFalse(methodology["requires_human_approval"])
         self.assertEqual(methodology["license_kind"], "cc-by-article")
         self.assertIn("methodology", methodology["bench_categories"])
+        self.assertFalse(sport_science["requires_human_approval"])
+        self.assertEqual(sport_science["license_kind"], "cc-by-article")
+        self.assertIn("sport-medicine", sport_science["bench_categories"])
 
     def test_coverage_report_tracks_license_and_undercoverage(self):
         from corpus_prep.coverage import build_coverage_report
