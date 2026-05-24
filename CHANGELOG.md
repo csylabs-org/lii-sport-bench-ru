@@ -2,7 +2,7 @@
 
 ## Unreleased — Corpus-Building Lane (May 23, 2026)
 
-**Status:** First high-signal source batch complete and scaled past the 5k corpus-build gate at `5102/5139` clean rows. `agy` remains the default cheap generation lane, with OpenRouter used as fallback/scale lane when `agy` returns malformed or empty output or batch throughput matters. Corpus collection is Mac-first; NVIDIA is deferred to SFT training.
+**Status:** First high-signal source batch complete and scaled past the 5k corpus-build gate at `5870/5907` clean rows, with no coverage underflags. `agy` remains the default cheap generation lane, with OpenRouter used as fallback/scale lane when `agy` returns malformed or empty output or batch throughput matters. Corpus collection is Mac-first; NVIDIA is deferred to SFT training.
 
 ### What shipped
 
@@ -162,17 +162,24 @@
   - second MinSport federal-standard section pass retained `162` chunks -> `486` OpenRouter rows
   - RUSADA section pass retained `100` chunks -> `300` OpenRouter rows
   - current clean release retains `610` MinSport federal-standard rows and `387` RUSADA rows
+- Added named-sport CC BY CyberLeninka methodology lane:
+  - source id: `sport-specific-ccby-cyberleninka`
+  - registered `35` named-sport article endpoints covering swimming, basketball, hockey, football, volleyball, athletics, gymnastics, and speed skating
+  - harvested `34` verified CC BY PDF full texts
+  - fixed CyberLeninka sport inference to prefer title/description/URL before full text, so bibliography terms do not override the article sport
+  - section-chunked `256` named-sport chunks and generated `768` OpenRouter rows
+  - current clean release retains all `768` rows from this source
 - Hardened long-batch synthesis:
   - malformed model JSON responses are skipped instead of aborting the entire job
   - source excerpts with mojibake/extraction-noise markers are dropped during cleaning
   - zero-row synthesis output is treated as invalid for scale-up and should trigger inspection/fallback before rebuilding
 - Current retained corpus checkpoint:
-  - `5139` generated examples
-  - `5102` kept after cleaning
+  - `5907` generated examples
+  - `5870` kept after cleaning
   - `37` dropped: `9` extraction-noise rows and `28` duplicates
-  - coverage: `2992` open-license rows, `1104` human-approved/internal rows, `1006` public-official rows
-  - category mix: `2236` methodology, `1381` history, `1089` rules, `387` anti-doping, `9` federation-procedures
-  - remaining coverage flag: `general_sport_above_50pct`
+  - coverage: `3760` open-license rows, `1104` human-approved/internal rows, `1006` public-official rows
+  - category mix: `3004` methodology, `1381` history, `1089` rules, `387` anti-doping, `9` federation-procedures
+  - sport mix: `general` down to `2867/5870` (`48.84%`); no undercoverage flags remain
 - Tightened the PII gate for standalone INN-like identifiers:
   - ВРВС sport-discipline codes such as `0420013611Я` are no longer dropped as false-positive INN-like PII
   - added regression coverage for retained sport discipline codes
@@ -225,8 +232,8 @@
 
 ### Next steps
 
-1. Freeze and review the current `5102/5139` checkpoint before any SFT attempt.
-2. Expand named-sport methodology/history/biomechanics/sport-medicine coverage to reduce `general_sport_above_50pct`.
+1. Cut an immutable internal snapshot from the current `5870/5907` checkpoint.
+2. Decide whether the first LoRA/DoRA pilot uses open-license rows only or the mixed internal corpus.
 3. Keep `teoriya.ru` blocked unless explicit reuse permission is obtained.
 
 ## v0.1 — 7-Model Open-vs-Closed Pilot (May 18, 2026)

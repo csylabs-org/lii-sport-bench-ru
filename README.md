@@ -131,17 +131,17 @@ Current status:
 - Corpus collection/prep runs Mac-first: local `pdftotext` + Tesseract `rus+eng` OCR on Apple Silicon, with NVIDIA reserved for later SFT training.
 - Default generation lane: Antigravity CLI `agy` using Gemini 3.5 Flash routing.
 - Fallback/audit lane: OpenRouter `google/gemini-3.5-flash`.
-- Current retained corpus: expanded RUSADA high-signal anti-doping + MinSport ЕКП/EVSK procedures + OCR federal standards + CC BY Лесгафта methodology articles + CC BY CyberLeninka sport-history, sport-methodology, and sport-science articles + Wikidata CC0 sport facts + human-approved official history pages + human-approved federation rules batches for hockey, volleyball, basketball, swimming, football, athletics, gymnastics, and winter sports, plus section-chunk passes over saved federation/MinSport/winter PDFs, `5102/5139` examples kept after cleaning.
+- Current retained corpus: expanded RUSADA high-signal anti-doping + MinSport ЕКП/EVSK procedures + OCR federal standards + CC BY Лесгафта methodology articles + CC BY CyberLeninka sport-history, sport-methodology, sport-science, and named-sport methodology articles + Wikidata CC0 sport facts + human-approved official history pages + human-approved federation rules batches for hockey, volleyball, basketball, swimming, football, athletics, gymnastics, and winter sports, plus section-chunk passes over saved federation/MinSport/winter PDFs, `5870/5907` examples kept after cleaning.
 - Count semantics: corpus counts are generated SFT Q&A examples, not source-document counts. Source documents/pages are tracked separately under ignored `corpus/raw/`.
-- The current release crosses the `5k` corpus-build gate, with `2992` open-license rows, `1104` human-approved/internal rows, and `1006` public-official rows. Do not start SFT until the 5k snapshot is frozen/reviewed and leakage/license/quality spot checks are signed off.
-- Production scale-up is documented in [`tools/corpus-prep/README.md`](./tools/corpus-prep/README.md): next expansion should reduce the remaining `general_sport_above_50pct` flag by targeting named-sport methodology/history/science, especially hockey, swimming, speed skating, basketball, athletics, football, volleyball, wrestling, and winter sports.
+- The current release crosses the `5k` corpus-build gate, with `3760` open-license rows, `1104` human-approved/internal rows, and `1006` public-official rows. The coverage report has no undercoverage flags, and `general` rows are down to `48.84%`.
+- Freeze/review notes are tracked in [`tools/corpus-prep/5K-SNAPSHOT-REVIEW.md`](./tools/corpus-prep/5K-SNAPSHOT-REVIEW.md). Do not start SFT until an immutable snapshot/export location is chosen and the human-approved/internal rows policy is signed off.
 - Federation-rule examples are marked `requires_human_approval=true` and `license_kind=human-approved-federation-public-doc`; keep them separate from clean open-license publication lanes until downstream release policy is decided.
 - Generated corpus artifacts are ignored by git under `corpus/`; release candidates should be reviewed before publication.
 
 Next corpus milestones:
 
-1. Freeze and review the current `5102/5139` clean checkpoint before any SFT attempt.
-2. Expand named-sport open-license CC BY/CC0 methodology, history, biomechanics, sport medicine, and undercovered sport-specific sources to bring `general` rows below 50%.
+1. Cut an immutable internal snapshot from the current `5870/5907` clean checkpoint.
+2. Decide whether the first LoRA/DoRA pilot uses open-license rows only or the mixed internal corpus.
 3. Keep `teoriya.ru` blocked unless explicit reuse permission is obtained; current site footer says copying materials is prohibited.
 
 ## License

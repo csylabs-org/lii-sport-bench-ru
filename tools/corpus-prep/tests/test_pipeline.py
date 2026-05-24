@@ -118,6 +118,7 @@ class CorpusPrepPipelineTests(unittest.TestCase):
         winter = by_id["winter-sports-approved"]
         methodology = by_id["sport-methodology-ccby-cyberleninka"]
         sport_science = by_id["sport-science-ccby-cyberleninka"]
+        sport_specific = by_id["sport-specific-ccby-cyberleninka"]
 
         self.assertTrue(fed_rules["requires_human_approval"])
         self.assertEqual(fed_rules["license_kind"], "license-check-required")
@@ -130,6 +131,9 @@ class CorpusPrepPipelineTests(unittest.TestCase):
         self.assertFalse(sport_science["requires_human_approval"])
         self.assertEqual(sport_science["license_kind"], "cc-by-article")
         self.assertIn("sport-medicine", sport_science["bench_categories"])
+        self.assertFalse(sport_specific["requires_human_approval"])
+        self.assertEqual(sport_specific["license_kind"], "cc-by-article")
+        self.assertIn("methodology", sport_specific["bench_categories"])
 
     def test_coverage_report_tracks_license_and_undercoverage(self):
         from corpus_prep.coverage import build_coverage_report
@@ -659,6 +663,36 @@ class CorpusPrepPipelineTests(unittest.TestCase):
 
         self.assertIsNone(row)
 
+    def test_cyberleninka_article_row_prefers_title_for_sport_inference(self):
+        from corpus_prep.harvest import cyberleninka_article_row_from_html
+
+        source = {"id": "sport-specific-ccby-cyberleninka", "bench_categories": ["methodology"]}
+        html = """
+        <html>
+          <head>
+            <meta name="citation_title" content="Функциональная подготовка юных пловцов">
+            <meta name="description" content="Методика подготовки пловцов в подготовительном периоде">
+            <meta name="DC.Rights" content="https://creativecommons.org/licenses/by/4.0/">
+          </head>
+          <body>
+            <article>
+              <p>CC BY. В библиографии также упоминаются футбол и хоккей, но предмет статьи — плавание.</p>
+              <p>Основной текст описывает построение тренировочного процесса пловцов, контроль функциональной подготовленности, работу на суше и перенос специальных упражнений в соревновательную дистанцию.</p>
+              <p>Дополнительный абзац нужен для прохождения минимального объема текста в парсере CyberLeninka.</p>
+            </article>
+          </body>
+        </html>
+        """
+
+        row = cyberleninka_article_row_from_html(
+            source,
+            "https://cyberleninka.ru/article/n/funktsionalnaya-podgotovka-yunyh-plovtsov",
+            html,
+        )
+
+        self.assertIsNotNone(row)
+        self.assertEqual(row["sport"], "swimming")
+
     def test_cyberleninka_harvest_uses_pdf_full_text_when_available(self):
         from corpus_prep.harvest import harvest_cyberleninka_articles
 
@@ -762,6 +796,8 @@ class CorpusPrepPipelineTests(unittest.TestCase):
         from corpus_prep.harvest import _infer_sport, harvest_federation_rules
 
         self.assertEqual(_infer_sport("Правила вида спорта «горнолыжный спорт»"), "alpine-skiing")
+        self.assertEqual(_infer_sport("методика подготовки хоккеистов"), "hockey")
+        self.assertEqual(_infer_sport("скоростно-силовая подготовка пловцов"), "swimming")
 
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
