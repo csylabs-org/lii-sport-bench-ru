@@ -4,6 +4,12 @@
 
 **Status:** First high-signal source batch complete and scaled past the 5k corpus-build gate at `5870/5907` clean rows, with no coverage underflags. `agy` remains the default cheap generation lane, with OpenRouter used as fallback/scale lane when `agy` returns malformed or empty output or batch throughput matters. Corpus collection is Mac-first; NVIDIA is deferred to SFT training.
 
+### Planning update — lab-practice alignment
+
+- Confirmed the corpus lane matches mature model-lab practice: held-out eval separation, source/license provenance, immutable data snapshots, row-level license lanes, small SFT ablations before scale-up, and benchmark-directed expansion.
+- Clarified storage policy: raw PDFs, OCR text, generated JSONL, and clean split artifacts stay ignored under `corpus/` during Mac-local iteration. Do not commit large PDFs to git; freeze them as local/external release artifacts and commit only manifests, hashes, coverage, and policy notes.
+- Updated next execution path: freeze the current `5870/5907` checkpoint, create open-license/public-safe and mixed-internal pilot manifests, run matching LoRA/DoRA smoke pilots, then expand only if weak-bucket benchmark deltas justify more corpus work.
+
 ### What shipped
 
 - Added `tools/corpus-prep/` corpus pipeline scaffold:

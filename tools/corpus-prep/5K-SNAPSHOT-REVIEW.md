@@ -30,3 +30,15 @@ Date: 2026-05-24
 ## Decision
 
 The corpus has crossed the 5k build gate and cleared the coverage underflags. Do not start SFT until an immutable snapshot/export location is chosen and the mixed internal vs open-license training policy is signed off.
+
+## Best-Practice Alignment
+
+This checkpoint is aligned with practical model-lab corpus practice: held-out benchmark data is excluded from training, source provenance is retained, license lanes are explicit, and the next step is a frozen snapshot plus measured pilot rather than blind row-count expansion.
+
+Raw PDFs, OCR text, synthetic JSONL, and clean split artifacts should remain ignored under `corpus/` during Mac-local iteration. Before SFT, freeze the exact artifact bundle and store the large files outside git; commit only the manifest, hashes, coverage summary, and release-policy notes.
+
+Recommended pilot decision:
+
+1. Open-license/public-safe pilot for release optionality.
+2. Mixed-internal pilot for maximum benchmark-lift measurement.
+3. Expand beyond this checkpoint only after per-bucket evaluation shows signal.

@@ -11,6 +11,7 @@ Offline-safe corpus pipeline scaffold for the Selectel AR45G validation batch.
 - Corpus example counts are generated SFT Q&A rows. Source counts are separate raw pages/PDFs/article records under `corpus/raw/`.
 - Federation-rule rows are retained for the working/internal corpus only: `requires_human_approval=true`, `license_kind=human-approved-federation-public-doc`.
 - New federation source inventory has saved football, athletics, gymnastics, and winter-sport PDFs under `corpus/raw/<source-id>/documents/`; winter sport PDFs are now section-chunked into the current internal release.
+- Large raw/source artifacts are intentionally repo-ignored during Mac-local iteration. Do not commit PDFs or generated corpus JSONL directly; freeze them as versioned release artifacts and commit only manifests, hashes, coverage, and policy notes.
 - Retained generated artifacts:
   - `corpus/raw/rusada-edu/harvest.jsonl`
   - `corpus/raw/evsk-ekp/harvest.jsonl`
@@ -107,6 +108,17 @@ Approximate production targets after chunking:
 | Wikidata CC0 sport facts | 423 | 300-600 | Inside first target band; next queries should be sport/event-specific |
 
 Current immediate task: cut an immutable internal snapshot from the `5870/5907` checkpoint before any SFT attempt. The current coverage report has no undercoverage flags; `general` rows are `2867/5870` (`48.84%`). Wrestling remains pending because the official documents page currently exposes a templated PDF URL with an unresolved `{item_id}` placeholder; resolve the live API/JS document id before harvesting it.
+
+## Lab-Practice Alignment
+
+The corpus lane is aligned with mature model-lab data practice:
+
+1. Held-out evaluation remains separate: `data/questions.json` is never used for training data.
+2. Source provenance is preserved per generated row through `source_id`, URL/title metadata, `license_kind`, `license_verified`, and `requires_human_approval`.
+3. License lanes are separated: open-license, public-official, and human-approved/internal rows are not collapsed into one public-release bucket.
+4. Snapshots must be immutable before SFT: release bundles need stable train/val/test files, coverage, license matrix, hashes, and generation logs.
+5. Scale decisions are benchmark-directed: run small SFT pilots first, then expand only the source lanes that move weak buckets.
+6. Raw PDFs/OCR/generated JSONL stay out of git; the repo tracks reproducible code and manifest documents, while large artifacts live in ignored local storage or external artifact storage.
 
 ## Bench-Gap Source Expansion
 
@@ -550,8 +562,13 @@ Secret lookup:
 ## Roadmap
 
 1. Cut an immutable internal snapshot from the current `5870/5907` clean high-signal checkpoint before any SFT attempt.
-2. Decide whether the first LoRA/DoRA pilot uses open-license rows only or the mixed internal corpus, while keeping internal federation rows separated.
-3. Keep `teoriya.ru` blocked unless explicit reuse permission is obtained.
+2. Store large raw/source artifacts outside git. Mac-local ignored `corpus/` is acceptable for the next iteration; before training, freeze the bundle locally and mirror it to external artifact storage or a release bucket.
+3. Build two pilot manifests from the frozen snapshot:
+   - open-license/public-safe rows for a publishable dataset/model lane
+   - full mixed-internal rows for maximum benchmark-lift testing
+4. Run a small LoRA/DoRA pilot on both manifests with the same training recipe and evaluate per bucket against the held-out benchmark.
+5. If weak-bucket deltas are positive, scale toward `10k-15k` with named-sport history, official/internal history, speed skating, hockey/regulatory, wrestling documents after URL resolution, and additional CC BY methodology/sport-science rows.
+6. Keep `teoriya.ru` blocked unless explicit reuse permission is obtained.
 
 ## Source Backlog
 

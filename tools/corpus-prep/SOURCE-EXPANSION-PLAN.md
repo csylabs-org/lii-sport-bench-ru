@@ -8,6 +8,8 @@
 
 **Tech Stack:** Python stdlib harvesters, `tools/corpus-prep/sources.yaml`, Antigravity CLI `agy`, local `pdftotext`/Tesseract, existing clean/leak/PII/split gates.
 
+**Lab-practice boundary:** Do not treat row count as the goal. Freeze immutable snapshots, preserve source/license provenance, evaluate small training pilots against held-out questions, and only then decide whether to scale. Raw PDFs and generated JSONL are working artifacts, not repository content; commit manifests and hashes, not large document payloads.
+
 ---
 
 ## Current Benchmark Motivation
@@ -187,3 +189,23 @@ Highest-leverage weak buckets from the 200-question pilot:
 - [x] Rebuild current clean release at `5870/5907`; `9` extraction-noise rows and `28` duplicates dropped.
 - [x] Confirm the coverage report now has no undercoverage flags.
 - [ ] If the frozen `5k-10k` snapshot passes gates, run a small LoRA/DoRA pilot.
+
+## Task 6: Freeze Snapshot + Pilot Decision
+
+**Gate:** The current `5870/5907` clean checkpoint is enough for a first SFT signal test. Do not generate more rows until this checkpoint is frozen and evaluated.
+
+**Files:**
+- Use ignored artifact storage under `corpus/` or external object storage for large data.
+- Commit only release manifests, hashes, coverage summaries, and policy notes.
+
+- [ ] Freeze `corpus/lii-sport-sft-v0.1-current-agy-clean/` as `lii-sport-sft-v0.1-5k-review-2026-05-24`.
+- [ ] Record SHA256 hashes for train/val/test, source manifests, raw harvest manifests, coverage report, and license matrix.
+- [ ] Create two pilot manifests:
+  - `open-license-public-safe`: CC BY / CC0 rows, with public-official inclusion decided explicitly.
+  - `mixed-internal`: full clean checkpoint with human-approved/internal rows retained.
+- [ ] Run the same LoRA/DoRA smoke recipe for both manifests.
+- [ ] Evaluate base Gemma 4 31B vs open-license pilot vs mixed-internal pilot on held-out benchmark buckets.
+- [ ] Decide next expansion:
+  - expand to `10k-15k` only if target weak buckets improve
+  - fix prompt/data format if no measurable lift appears
+  - keep public release and internal training artifacts separated

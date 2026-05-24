@@ -138,11 +138,18 @@ Current status:
 - Federation-rule examples are marked `requires_human_approval=true` and `license_kind=human-approved-federation-public-doc`; keep them separate from clean open-license publication lanes until downstream release policy is decided.
 - Generated corpus artifacts are ignored by git under `corpus/`; release candidates should be reviewed before publication.
 
+Corpus-build operating model:
+
+- This lane follows the same practical pattern used by serious model/data labs: preserve held-out evals, keep source provenance and license lanes explicit, freeze immutable data snapshots, run small ablation pilots before scale-up, and only expand sources after measured benchmark movement.
+- Raw PDFs, OCR text, synthetic JSONL, and clean train/val/test exports remain ignored under `corpus/` for now. That is safe for Mac-local iteration, but reproducibility requires a frozen artifact bundle before SFT.
+- Do not commit large source PDFs to the repo. For the first SFT pilot, store the frozen corpus bundle in a local release directory plus external object storage or GitHub Release artifacts, then commit only manifests, hashes, coverage, and policy notes.
+
 Next corpus milestones:
 
-1. Cut an immutable internal snapshot from the current `5870/5907` clean checkpoint.
-2. Decide whether the first LoRA/DoRA pilot uses open-license rows only or the mixed internal corpus.
-3. Keep `teoriya.ru` blocked unless explicit reuse permission is obtained; current site footer says copying materials is prohibited.
+1. Cut an immutable internal snapshot from the current `5870/5907` clean checkpoint, including `MANIFEST.md`, `LICENSE-MATRIX.csv`, `hashes.json`, `stats.json`, `coverage.json`, and the exact train/val/test split.
+2. Create two SFT pilot manifests: public-safe open-license lane and mixed-internal lane. Train/evaluate both with the same recipe to measure whether internal federation/MinSport rows add benchmark lift.
+3. Run a small LoRA/DoRA smoke pilot before any 10k-15k expansion. Expand only if the pilot improves the weak buckets: history, ВУЗ, СШОР, winter sports, methodology, volleyball, and federation/regulatory.
+4. Keep `teoriya.ru` blocked unless explicit reuse permission is obtained; current site footer says copying materials is prohibited.
 
 ## License
 
