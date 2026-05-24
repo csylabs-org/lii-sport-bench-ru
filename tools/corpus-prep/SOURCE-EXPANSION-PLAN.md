@@ -33,6 +33,7 @@ Highest-leverage weak buckets from the 200-question pilot:
 | CC BY sport history papers | `sport-history-ccby-cyberleninka` | public-safe if page exposes CC BY | 800-1200 rows | Scaled to 943 retained rows after filtered section chunks and top-ups |
 | CC BY sport methodology papers | `sport-methodology-ccby-cyberleninka` | public-safe if page exposes CC BY | 300-600 rows | Scaled to 393 retained rows across methodology, biomechanics, planning, selection, and training concepts |
 | CC BY sport science papers | `sport-science-ccby-cyberleninka` | public-safe if page exposes CC BY | 1000-1500 rows | Scaled to 1197 retained rows across medicine, injuries, biomechanics, psychology, endurance, skiing, snowboard, basketball, volleyball, athletics, and wrestling |
+| CC BY named-sport methodology papers | `sport-specific-ccby-cyberleninka` | public-safe if page exposes CC BY | 700-1200 rows | Scaled to 768 retained rows and cleared the `general_sport_above_50pct` flag |
 | CC0 sport facts | `sport-facts-wikidata-cc0` | public-safe | 300-600 rows | Scaled to 423 retained rows; next query should be sport/event-specific |
 | Official history pages | `sport-history-official-approved` | human-approved/internal | 500-1000 rows | Federation and OKR timelines, milestones, biographies |
 | Winter sport rules/methodology | `winter-sports-approved` + CC BY article filters | mixed; keep separated | 500-1000 rows | Scaled to 558 retained rows after winter PDF section chunks |
@@ -148,6 +149,22 @@ Highest-leverage weak buckets from the 200-question pilot:
 - [x] Generate 537 rows through `agy` and 660 rows through OpenRouter `google/gemini-3.5-flash`.
 - [x] Rebuild combined clean release with `1197` retained rows from this source.
 
+## Task 4.9: Add Named-Sport CC BY Methodology Lane
+
+**Files:**
+- Modify: `tools/corpus-prep/sources.yaml`
+- Modify: `tools/corpus-prep/corpus_prep/registry.py`
+- Modify: `tools/corpus-prep/corpus_prep/harvest.py`
+- Write ignored raw data under `corpus/raw/sport-specific-ccby-cyberleninka/`
+
+- [x] Add `sport-specific-ccby-cyberleninka` with `harvester=cyberleninka_article_list`, `license_kind=cc-by-article`, `license_verified=true`, `requires_human_approval=false`.
+- [x] Register 35 named-sport CC BY CyberLeninka article endpoints covering swimming, basketball, hockey, football, volleyball, athletics, gymnastics, and speed skating.
+- [x] Harvest 34 verified PDF full texts into ignored raw documents.
+- [x] Fix CyberLeninka sport inference to prefer title/description/URL before full text; this prevents bibliography terms from overriding the article sport.
+- [x] Section-chunk the lane: 256 filtered chunks, 0 extraction-noise drops.
+- [x] Generate 768 rows through OpenRouter `google/gemini-3.5-flash`.
+- [x] Rebuild combined clean release with `768` retained rows from this source.
+
 ## Task 5: Production Scale Decision
 
 **Gate:** Do not train until at least `5k-10k` clean high-signal rows exist and category/sport coverage is visibly closer to the bench distribution.
@@ -164,7 +181,9 @@ Highest-leverage weak buckets from the 200-question pilot:
 - [x] Add CC BY sport-science lane and scale it to `1197` retained rows.
 - [x] Expand CC BY history to `943` retained rows and Wikidata CC0 sport facts to `423` retained rows.
 - [x] Expand MinSport federal standards to `610` retained rows and RUSADA anti-doping to `387` retained rows.
-- [x] Rebuild current clean release at `5102/5139`; `9` extraction-noise rows and `28` duplicates dropped.
+- [x] Rebuild previous 5k clean release at `5102/5139`; `9` extraction-noise rows and `28` duplicates dropped.
 - [x] Confirm the `5k` corpus-build gate is reached. Do not train until this checkpoint is frozen/reviewed and leakage/license/quality spot checks are signed off.
-- [ ] Reduce remaining `general_sport_above_50pct` coverage flag with named-sport methodology/history/science chunks.
+- [x] Reduce remaining `general_sport_above_50pct` coverage flag with named-sport methodology chunks: current `general` share is `2867/5870` (`48.84%`).
+- [x] Rebuild current clean release at `5870/5907`; `9` extraction-noise rows and `28` duplicates dropped.
+- [x] Confirm the coverage report now has no undercoverage flags.
 - [ ] If the frozen `5k-10k` snapshot passes gates, run a small LoRA/DoRA pilot.

@@ -623,6 +623,9 @@ def cyberleninka_article_row_from_html(source: dict[str, Any], url: str, body: s
     text = _trim_cyberleninka_boilerplate(text)
     if len(text) < 200:
         return None
+    sport = _infer_sport(" ".join(part for part in [title or "", description, url] if part))
+    if sport == "general":
+        sport = _infer_sport(text)
 
     return {
         "id": _row_id(str(source["id"]), url),
@@ -633,7 +636,7 @@ def cyberleninka_article_row_from_html(source: dict[str, Any], url: str, body: s
         "license_url": _cc_by_license_url(body) or "CC BY",
         "license_verified": True,
         "requires_human_approval": bool(source.get("requires_human_approval", False)),
-        "sport": _infer_sport(text),
+        "sport": sport,
         "category": _first_category(source),
         "content_type": "text/html",
         "text": text[:120_000],
@@ -1179,11 +1182,11 @@ def _first_category(source: dict[str, Any]) -> str:
 def _infer_sport(value: str) -> str:
     normalized = value.casefold()
     sport_markers = [
-        ("hockey", ["хоккей", "fhr.ru", "vks.fhr.ru"]),
+        ("hockey", ["хоккей", "хокке", "fhr.ru", "vks.fhr.ru"]),
         ("volleyball", ["волейбол", "volley.ru", "volleyball"]),
         ("basketball", ["баскетбол", "russiabasket", "basketball"]),
         ("football", ["футбол", "rfs.ru", "football"]),
-        ("swimming", ["плаван", "russwimming", "swimming"]),
+        ("swimming", ["плаван", "пловц", "russwimming", "swimming"]),
         ("athletics", ["легк", "rusathletics", "athletics"]),
         ("wrestling", ["борьб", "wrestrus", "wrestling"]),
         ("gymnastics", ["гимнаст", "sportgymrus", "gymnastics"]),
