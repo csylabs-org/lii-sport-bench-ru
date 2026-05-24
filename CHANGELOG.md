@@ -2,7 +2,7 @@
 
 ## Unreleased — Corpus-Building Lane (May 23, 2026)
 
-**Status:** First high-signal source batch complete and scaled to a `2208/2217` clean checkpoint. `agy` remains the default cheap generation lane, with OpenRouter used as fallback when `agy` returns malformed or empty output. Corpus collection is Mac-first; NVIDIA is deferred to SFT training.
+**Status:** First high-signal source batch complete and scaled past the 5k corpus-build gate at `5102/5139` clean rows. `agy` remains the default cheap generation lane, with OpenRouter used as fallback/scale lane when `agy` returns malformed or empty output or batch throughput matters. Corpus collection is Mac-first; NVIDIA is deferred to SFT training.
 
 ### What shipped
 
@@ -146,15 +146,33 @@
   - built a `120`-chunk history pool and rejected `9` mojibake/noise-heavy chunks before synthesis
   - `agy` returned malformed/empty output for this history batch, so OpenRouter `google/gemini-3.5-flash` produced the retained `330` section-chunk rows
   - sport-history source retained rows now total `396`, inside the documented `300-600` row target band
+- Added CC BY CyberLeninka sport-science lane:
+  - source id: `sport-science-ccby-cyberleninka`
+  - registered `26` CC BY article endpoints covering sport medicine, injury prevention, endurance, biomechanics, psychology, skiing, snowboard, basketball, volleyball, athletics, and wrestling
+  - harvested and saved `26` PDF full texts under ignored raw artifacts
+  - initial filtered section pass retained `179` chunks -> `537` generated rows through `agy`
+  - second filtered section pass retained `220` chunks -> `660` generated rows through OpenRouter `google/gemini-3.5-flash`
+  - current clean release retains `1197` rows from this source
+- Scaled CC BY history and CC0 facts:
+  - added a `57`-chunk history top-up -> `171` OpenRouter rows
+  - added a `131`-chunk history top-up -> `393` OpenRouter rows
+  - expanded Wikidata CC0 from `16` raw facts to `141` total raw facts and synthesized `125` new records -> `375` OpenRouter rows
+  - current clean release retains `943` CyberLeninka history rows and `423` Wikidata CC0 rows
+- Scaled MinSport/RUSADA toward the 5k gate:
+  - second MinSport federal-standard section pass retained `162` chunks -> `486` OpenRouter rows
+  - RUSADA section pass retained `100` chunks -> `300` OpenRouter rows
+  - current clean release retains `610` MinSport federal-standard rows and `387` RUSADA rows
 - Hardened long-batch synthesis:
   - malformed model JSON responses are skipped instead of aborting the entire job
   - source excerpts with mojibake/extraction-noise markers are dropped during cleaning
   - zero-row synthesis output is treated as invalid for scale-up and should trigger inspection/fallback before rebuilding
 - Current retained corpus checkpoint:
-  - `2217` generated examples
-  - `2208` kept after cleaning
-  - `9` dropped by the extraction-noise gate
-  - content-balance flags are cleared; only `below_sft_gate_5k` remains
+  - `5139` generated examples
+  - `5102` kept after cleaning
+  - `37` dropped: `9` extraction-noise rows and `28` duplicates
+  - coverage: `2992` open-license rows, `1104` human-approved/internal rows, `1006` public-official rows
+  - category mix: `2236` methodology, `1381` history, `1089` rules, `387` anti-doping, `9` federation-procedures
+  - remaining coverage flag: `general_sport_above_50pct`
 - Tightened the PII gate for standalone INN-like identifiers:
   - ВРВС sport-discipline codes such as `0420013611Я` are no longer dropped as false-positive INN-like PII
   - added regression coverage for retained sport discipline codes
@@ -207,8 +225,8 @@
 
 ### Next steps
 
-1. Scale the current `2208/2217` checkpoint to `5k-10k` clean high-signal rows before any SFT attempt.
-2. Expand open-license methodology/history/biomechanics/sport-medicine coverage and undercovered sport breadth.
+1. Freeze and review the current `5102/5139` checkpoint before any SFT attempt.
+2. Expand named-sport methodology/history/biomechanics/sport-medicine coverage to reduce `general_sport_above_50pct`.
 3. Keep `teoriya.ru` blocked unless explicit reuse permission is obtained.
 
 ## v0.1 — 7-Model Open-vs-Closed Pilot (May 18, 2026)
