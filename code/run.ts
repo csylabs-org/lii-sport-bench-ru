@@ -2,8 +2,12 @@ import { readFileSync, writeFileSync, existsSync, mkdirSync } from "fs";
 import { join } from "path";
 import type { Question, CandidateOutput } from "./types.ts";
 
-const KEY = process.env.OPENROUTER_API_KEY;
-if (!KEY) throw new Error("OPENROUTER_API_KEY not set in env");
+// Candidate endpoint: default OpenRouter, override CANDIDATE_BASE_URL to point at any
+// OpenAI-compatible /chat/completions endpoint (e.g. a local llama.cpp server for same-stack A/B).
+const BASE_URL = process.env.CANDIDATE_BASE_URL ?? "https://openrouter.ai/api/v1/chat/completions";
+const IS_OR = BASE_URL.includes("openrouter.ai");
+const KEY = process.env.OPENROUTER_API_KEY ?? "sk-local-dummy";
+if (IS_OR && !process.env.OPENROUTER_API_KEY) throw new Error("OPENROUTER_API_KEY not set in env");
 
 const MODEL = process.env.MODEL;
 if (!MODEL) throw new Error("MODEL not set (e.g. MODEL=google/gemma-4-31b-it)");
@@ -14,7 +18,10 @@ const SEED = process.env.SEED ?? "lii-2026-05-13";
 const MAX_TOKENS = parseInt(process.env.MAX_TOKENS ?? "2048", 10);
 
 const IN = join(import.meta.dir, "..", "data", INPUT_FILE);
-const SYS_PROMPT = readFileSync(join(import.meta.dir, "..", "prompts", "candidate-system.md"), "utf-8");
+const SYS_PROMPT_BASE = readFileSync(join(import.meta.dir, "..", "prompts", "candidate-system.md"), "utf-8");
+// Optional suffix appended to the system prompt (e.g. force thoroughness for a length-controlled A/B).
+const SYS_SUFFIX = process.env.SYS_SUFFIX ?? "";
+const SYS_PROMPT = SYS_SUFFIX ? SYS_PROMPT_BASE + "\n\n" + SYS_SUFFIX : SYS_PROMPT_BASE;
 const OUT_DIR = join(import.meta.dir, "..", "data", "outputs");
 mkdirSync(OUT_DIR, { recursive: true });
 const MODEL_SAFE = MODEL.replace(/\//g, "__");
@@ -35,7 +42,7 @@ console.log(`Running ${MODEL} on ${todo.length}/${questions.length} questions (c
 async function callOR(q: Question): Promise<CandidateOutput> {
   const start = performance.now();
   try {
-    const resp = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+    const resp = await fetch(BASE_URL, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${KEY}`,
@@ -52,7 +59,7 @@ async function callOR(q: Question): Promise<CandidateOutput> {
         max_tokens: MAX_TOKENS,
         temperature: 0,
         seed: hash32(SEED + ":" + q.id),
-        provider: { sort: "price" },
+        ...(IS_OR ? { provider: { sort: "price" } } : {}),
       }),
     });
     const elapsed_ms = Math.round(performance.now() - start);
