@@ -99,4 +99,4 @@ If you teach at a sports academy / university / СШОР / federation training c
 
 ---
 
-*Methodology questions, license clarifications, federation-level collaboration asks → daniel@csylabs.com or [@techaroundsports](https://t.me/techaroundsports).*
+*Methodology questions, license clarifications, federation-level collaboration asks → daniel@csylabs.com or [@csylabs](https://t.me/csylabs).*
