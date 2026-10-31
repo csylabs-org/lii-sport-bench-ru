@@ -179,7 +179,7 @@ If you validate methodology with a substantive contribution (new test items / gr
 
 ООО «Лаборатория инновационных инициатив» (ЛИИ)
 ИНН 2100031165 · Чебоксары, Чувашская Республика, РФ
-daniel@csylabs.com · [@techaroundsports](https://t.me/techaroundsports)
+daniel@csylabs.com · [@csylabs](https://t.me/csylabs)
 
 ## Cite
 
